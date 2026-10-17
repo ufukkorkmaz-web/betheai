@@ -1,0 +1,1468 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Be the AI</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500..800&family=Manrope:wght@400..700&family=JetBrains+Mono:wght@400..700&display=swap">
+<style>
+/* Layout: a single locked screen (no page scroll). Frosted glass panels float over slow-moving colour orbs.
+   A script shrinks the root font size in small steps until the current screen fits, so every size below is in rem.
+   Committed to one dark look on purpose: glass needs a dark, colourful ground to read well. */
+:root {
+  color-scheme: dark;
+  --bg: #080A1C;
+  --ink: #F4F6FF;
+  --ink-2: rgba(244, 246, 255, .74);
+  --accent: #FFC857;
+  --accent-hi: #FFD479;
+  --accent-2: #FF9F6B;
+  --on-accent: #1A1330;
+  --glow: rgba(255, 170, 90, .4);
+  --orb-1: #6C5CFF;
+  --orb-2: #12C9C0;
+  --orb-3: #FF4F8B;
+  --orb-4: #FFB347;
+  --glass-hi: rgba(255, 255, 255, .14);
+  --glass-lo: rgba(255, 255, 255, .04);
+  --glass-tint: rgba(12, 14, 36, .46);
+  --edge: rgba(255, 255, 255, .2);
+  --edge-strong: rgba(255, 255, 255, .42);
+  --shine: rgba(255, 255, 255, .3);
+  --shine-strong: rgba(255, 255, 255, .6);
+  --shadow: rgba(3, 4, 20, .42);
+  --fill: rgba(255, 255, 255, .08);
+  --fill-2: rgba(255, 255, 255, .16);
+  --good: #6CF5BE;
+  --good-bg: rgba(76, 230, 170, .17);
+  --bad: #FF93A6;
+  --bad-bg: rgba(255, 110, 140, .2);
+  --mid: #A5C8FF;
+  --mid-bg: rgba(120, 170, 255, .2);
+  --f-display: "Sora", "Helvetica Neue", Arial, sans-serif;
+  --f-body: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+html { height: 100%; font-size: 16px; }
+body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 1rem;
+  line-height: 1.45;
+  padding-block: .75rem;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+h1, h2, h3, p { margin: 0; }
+button, input { font: inherit; color: inherit; }
+:focus-visible { outline: .18rem solid var(--accent); outline-offset: .15rem; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Background orbs */
+.bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; background: var(--bg); pointer-events: none; }
+.orb { position: absolute; width: min(80vw, 34rem); aspect-ratio: 1; border-radius: 50%; filter: blur(70px); opacity: .72; animation: drift 24s ease-in-out infinite alternate; }
+.o1 { background: var(--orb-1); left: -18%; top: -14%; }
+.o2 { background: var(--orb-2); right: -22%; top: 14%; animation-delay: -7s; }
+.o3 { background: var(--orb-3); left: 4%; bottom: -26%; animation-delay: -12s; }
+.o4 { width: min(50vw, 22rem); background: var(--orb-4); right: 8%; bottom: -12%; opacity: .45; animation-delay: -4s; }
+@keyframes drift { to { transform: translate3d(7%, 9%, 0) scale(1.14); } }
+
+/* Glass */
+.glass {
+  background: linear-gradient(135deg, var(--glass-hi), var(--glass-lo)), var(--glass-tint);
+  border: 1px solid var(--edge);
+  border-radius: 1.25rem;
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(20px) saturate(160%);
+  box-shadow: 0 .5rem 2rem var(--shadow), inset 0 1px 0 var(--shine);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass { background: rgba(22, 24, 56, .9); }
+}
+
+/* Frame */
+.app { position: relative; z-index: 1; height: 100%; max-width: 64rem; margin-inline: auto; display: flex; flex-direction: column; }
+.screen { flex: 1 0 auto; display: flex; flex-direction: column; justify-content: center; gap: 1rem; }
+#screen-play { justify-content: flex-start; gap: .8rem; }
+.eyebrow { font: 500 .72rem/1 var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); }
+.title { font-family: var(--f-display); font-weight: 800; font-size: clamp(2.3rem, 10vw, 4.4rem); line-height: 1; letter-spacing: -.03em; text-wrap: balance; }
+.title mark {
+  display: inline-block;
+  padding: 0 .16em;
+  border-radius: .2em;
+  background: linear-gradient(135deg, var(--accent-hi), var(--accent-2));
+  color: var(--on-accent);
+  transform: rotate(-2deg);
+  box-shadow: 0 .5rem 1.6rem var(--glow);
+}
+.lead { max-width: 34rem; font-size: 1.05rem; color: var(--ink-2); }
+.kinds { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; }
+.kind { padding: .8rem .95rem; border-radius: 1rem; }
+.kind h3 { margin-bottom: .2rem; font: 700 .95rem var(--f-display); }
+.kind p { font-size: .82rem; line-height: 1.35; color: var(--ink-2); }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: .7rem; }
+.actions .btn { flex: 1 1 9rem; }
+.best { font: 500 .78rem var(--f-mono); color: var(--ink-2); }
+
+/* Buttons and inputs */
+.btn {
+  min-height: 2.9rem;
+  padding: .55rem 1.2rem;
+  border: 1px solid var(--edge);
+  border-radius: .9rem;
+  background: var(--fill-2);
+  color: var(--ink);
+  font: 650 .95rem var(--f-body);
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: inset 0 1px 0 var(--shine);
+  transition: transform .12s, filter .12s, border-color .12s;
+}
+.btn:hover:not(:disabled) { transform: translateY(-1px); border-color: var(--edge-strong); filter: brightness(1.12); }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn.primary { border-color: transparent; background: linear-gradient(135deg, var(--accent-hi), var(--accent-2)); color: var(--on-accent); box-shadow: 0 .5rem 1.4rem var(--glow), inset 0 1px 0 var(--shine-strong); }
+.btn.big { min-height: 3.4rem; font-size: 1.05rem; }
+.btn.small { min-height: 2.4rem; padding: .35rem .9rem; font-size: .88rem; white-space: nowrap; }
+.btn.ghost { background: transparent; box-shadow: none; }
+.input {
+  width: 100%;
+  min-height: 3rem;
+  padding: .55rem .9rem;
+  border: 1px solid var(--edge-strong);
+  border-radius: .85rem;
+  background: var(--fill);
+  font-size: max(16px, 1.05rem);
+  box-shadow: inset 0 .1rem .5rem var(--shadow);
+}
+.input::placeholder { color: var(--ink-2); }
+
+/* HUD */
+.hud { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: .5rem 1rem; }
+.hud-q { font: 600 .78rem var(--f-mono); letter-spacing: .08em; text-transform: uppercase; }
+.hud-score { font: 500 .78rem var(--f-mono); color: var(--ink-2); }
+.hud-score b { margin-left: .45rem; color: var(--ink); font: 700 1.35rem var(--f-display); font-variant-numeric: tabular-nums; }
+.pips { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(10, 1fr); gap: .25rem; }
+.pip { height: .45rem; border-radius: .25rem; background: var(--fill-2); }
+.pip.now { background: var(--ink); }
+.pip.t-good { background: var(--good); }
+.pip.t-ok { background: var(--mid); }
+.pip.t-bad { background: var(--bad); }
+
+/* Chat */
+.thread { flex: 1 0 auto; display: grid; align-content: start; gap: .7rem; }
+.row { display: grid; gap: .3rem; animation: pop .22s ease-out; }
+.row.out { justify-items: end; }
+@keyframes pop { from { opacity: 0; transform: translateY(.4rem); } }
+.meta { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; font: 500 .72rem/1 var(--f-mono); color: var(--ink-2); }
+.chip { padding: .2rem .4rem; border: 1px solid var(--edge); border-radius: .35rem; font-size: .66rem; letter-spacing: .06em; text-transform: uppercase; }
+.msg { max-width: min(100%, 36rem); padding: .7rem 1rem; border-radius: 1.1rem 1.1rem 1.1rem .25rem; font-size: 1.02rem; overflow-wrap: anywhere; }
+.msg.in { background: linear-gradient(135deg, var(--glass-hi), var(--glass-lo)), var(--glass-tint); border: 1px solid var(--edge); -webkit-backdrop-filter: blur(20px) saturate(160%); backdrop-filter: blur(20px) saturate(160%); box-shadow: 0 .4rem 1.4rem var(--shadow), inset 0 1px 0 var(--shine); }
+.msg.out { border-radius: 1.1rem 1.1rem .25rem 1.1rem; background: linear-gradient(135deg, var(--accent-hi), var(--accent-2)); color: var(--on-accent); font-weight: 650; box-shadow: 0 .4rem 1.4rem var(--glow); }
+.tag { display: block; margin-top: .15rem; font: 600 .66rem var(--f-mono); letter-spacing: .06em; text-transform: uppercase; opacity: .75; }
+.typing { display: inline-flex; align-items: center; gap: .25rem; min-height: 2.4rem; }
+.typing i { width: .45rem; height: .45rem; border-radius: 50%; background: var(--ink-2); animation: blink 1s infinite; }
+.typing i:nth-child(2) { animation-delay: .15s; }
+.typing i:nth-child(3) { animation-delay: .3s; }
+@keyframes blink { 0%, 60%, 100% { opacity: .25; } 30% { opacity: 1; } }
+.sentence { margin-top: .3rem; font-size: 1.2rem; font-weight: 650; line-height: 1.6; }
+.slot { display: inline-block; min-width: 5ch; padding: 0 .5rem; border-bottom: .15rem solid var(--ink); text-align: center; font-family: var(--f-mono); }
+.slot.filled { border-bottom-color: transparent; border-radius: .3rem; background: var(--accent); color: var(--on-accent); }
+.claim { margin-top: .5rem; padding: .55rem .75rem; border-radius: .7rem; background: var(--fill-2); font-weight: 650; }
+
+/* Composer */
+.composer { display: grid; gap: .7rem; padding: .9rem; }
+.composer-label { font: 600 .68rem/1 var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); }
+.form { display: grid; gap: .6rem; }
+.field-label { font-size: .85rem; font-weight: 650; }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: .25rem; padding: .25rem; border: 1px solid var(--edge); border-radius: .85rem; background: var(--fill); }
+.seg-btn { min-height: 2.4rem; padding: .3rem .4rem; border: 0; border-radius: .6rem; background: transparent; font-weight: 650; font-size: .88rem; cursor: pointer; }
+.seg-btn[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+.hint { font: 400 .78rem var(--f-mono); color: var(--ink-2); }
+.tools { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .5rem; }
+.chip-btn { min-height: 2rem; padding: .2rem .7rem; border: 1px solid var(--accent); border-radius: 2rem; background: var(--fill); font: 600 .74rem var(--f-mono); cursor: pointer; }
+.chip-btn:hover:not(:disabled) { background: var(--fill-2); }
+.chip-btn:disabled { opacity: .45; cursor: not-allowed; }
+.tool-note { font-size: .82rem; color: var(--accent-hi); }
+.opt { display: grid; grid-template-columns: auto 1fr; align-items: start; gap: .7rem; width: 100%; padding: .6rem .75rem; border: 1px solid var(--edge); border-radius: .9rem; background: var(--fill); color: var(--ink); text-align: left; cursor: pointer; transition: background .12s, border-color .12s; }
+.opt:hover:not(:disabled) { background: var(--fill-2); border-color: var(--edge-strong); }
+.opt:disabled { cursor: not-allowed; }
+.opt.struck { opacity: .4; text-decoration: line-through; }
+.key { display: inline-grid; place-items: center; min-width: 1.6rem; height: 1.6rem; border-radius: .45rem; background: var(--fill-2); font: 700 .75rem var(--f-mono); }
+.choices { display: grid; gap: .5rem; }
+.opt-text { min-width: 0; font-size: .95rem; line-height: 1.35; }
+.flag { margin-left: .4rem; padding: .1rem .4rem; border-radius: .3rem; background: var(--bad-bg); color: var(--bad); font: 700 .64rem var(--f-mono); letter-spacing: .06em; text-transform: uppercase; text-decoration: none; display: inline-block; }
+.words { display: grid; grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr)); gap: .5rem; }
+.opt.word { align-items: center; font: 600 1.05rem var(--f-mono); }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: .5rem; }
+.opt.fact { align-items: center; font-weight: 700; font-size: 1.02rem; }
+
+/* Feedback */
+.fb { display: grid; gap: .55rem; padding: .95rem; }
+.fb.tone-good { background: linear-gradient(135deg, var(--good-bg), var(--glass-lo)), var(--glass-tint); border-color: var(--good); }
+.fb.tone-ok { background: linear-gradient(135deg, var(--mid-bg), var(--glass-lo)), var(--glass-tint); border-color: var(--mid); }
+.fb.tone-bad { background: linear-gradient(135deg, var(--bad-bg), var(--glass-lo)), var(--glass-tint); border-color: var(--bad); }
+.fb-head { display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
+.pill { font: 700 .72rem/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; }
+.tone-good .pill, .tone-good .pts { color: var(--good); }
+.tone-ok .pill, .tone-ok .pts { color: var(--mid); }
+.tone-bad .pill, .tone-bad .pts { color: var(--bad); }
+.pts { font: 800 1.7rem/1 var(--f-display); font-variant-numeric: tabular-nums; }
+.fb-title { font: 700 1.1rem/1.25 var(--f-display); text-wrap: balance; }
+.fb-body { max-width: 62ch; font-size: .92rem; }
+.fb-best { font-size: .88rem; color: var(--ink-2); }
+.fb-best strong { color: var(--ink); }
+.fb .btn { justify-self: start; }
+.bars { display: grid; gap: .35rem; }
+.bar-row { display: grid; grid-template-columns: minmax(4.5rem, 7rem) 1fr 3rem; align-items: center; gap: .6rem; font: 500 .8rem var(--f-mono); }
+.bar-word small { font: 400 .66rem var(--f-mono); color: var(--ink-2); }
+.bar-track { height: .6rem; border-radius: .4rem; background: var(--fill-2); overflow: hidden; }
+.bar-fill { display: block; height: 100%; border-radius: .4rem; background: var(--ink-2); }
+.bar-row.top .bar-fill { background: linear-gradient(90deg, var(--accent-hi), var(--accent-2)); }
+.bar-pct { text-align: right; font-variant-numeric: tabular-nums; }
+.bars-note { font: 400 .66rem var(--f-mono); color: var(--ink-2); }
+
+/* End screen */
+.score-big { display: flex; align-items: baseline; gap: .6rem; font-family: var(--f-display); font-weight: 800; line-height: .9; }
+.score-big b { font-size: clamp(3.6rem, 18vw, 6.5rem); letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+.score-big span { font-size: 1.4rem; color: var(--ink-2); }
+.tier { font: 800 clamp(1.4rem, 5.5vw, 2rem)/1.15 var(--f-display); }
+.tier mark { padding: 0 .2em; border-radius: .2em; background: linear-gradient(135deg, var(--accent-hi), var(--accent-2)); color: var(--on-accent); }
+.earn { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem 1rem; padding: .7rem 1rem; }
+.earn b { font: 800 1.5rem var(--f-display); color: var(--accent-hi); font-variant-numeric: tabular-nums; }
+.earn span { font-size: .88rem; color: var(--ink-2); }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr)); gap: .5rem; }
+.stat { display: grid; gap: .1rem; padding: .55rem .8rem; border-radius: .9rem; }
+.stat b { font: 700 1.15rem var(--f-mono); font-variant-numeric: tabular-nums; }
+.stat span { font-size: .74rem; color: var(--ink-2); line-height: 1.2; }
+.strip { display: grid; grid-template-columns: repeat(10, 1fr); gap: .25rem; }
+.cell { display: grid; justify-items: center; gap: .15rem; padding: .35rem 0; border-radius: .6rem; background: var(--fill); font: 700 .74rem var(--f-mono); font-variant-numeric: tabular-nums; }
+.cell small { font: 500 .6rem var(--f-mono); color: var(--ink-2); }
+.cell.t-good { color: var(--good); background: var(--good-bg); }
+.cell.t-ok { color: var(--mid); background: var(--mid-bg); }
+.cell.t-bad { color: var(--bad); background: var(--bad-bg); }
+.think { font-size: .88rem; color: var(--ink-2); }
+.think strong { color: var(--ink); }
+
+/* Shop */
+.bal { display: flex; align-items: baseline; gap: .6rem; font-family: var(--f-display); }
+.bal b { font-size: clamp(2.6rem, 11vw, 4rem); font-weight: 800; letter-spacing: -.03em; line-height: 1; color: var(--accent-hi); font-variant-numeric: tabular-nums; }
+.bal span { color: var(--ink-2); font-size: 1.1rem; }
+.shop-msg { min-height: 1.3rem; font-size: .88rem; color: var(--accent-hi); }
+.ups { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: .6rem; }
+.up { display: flex; align-items: center; justify-content: space-between; gap: .8rem; padding: .75rem .9rem; border-radius: 1rem; }
+.up-main { min-width: 0; display: grid; gap: .15rem; }
+.up h3 { font: 700 .98rem var(--f-display); }
+.up p { font-size: .8rem; line-height: 1.3; color: var(--ink-2); }
+.up .up-use { font: 500 .7rem var(--f-mono); color: var(--ink); }
+.lv { display: inline-flex; gap: .2rem; margin-left: .5rem; vertical-align: middle; }
+.lv i { width: .55rem; height: .55rem; border-radius: 50%; background: var(--fill-2); }
+.lv i.on { background: var(--accent); }
+
+
+/* Leaderboard and layout */
+#screen-start { width: 100%; max-width: 47.5rem; margin-inline: auto; }
+#screen-play { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "hud" "board" "main"; align-content: start; gap: .6rem; }
+#screen-play .hud { grid-area: hud; }
+#screen-play .board { grid-area: board; }
+.play-main { grid-area: main; min-width: 0; display: flex; flex-direction: column; gap: .8rem; }
+.hud-score { display: flex; align-items: baseline; gap: 1.2rem; }
+.kind.wide { grid-column: 1 / -1; }
+
+.board { --rh: 2.45rem; display: grid; gap: .55rem; align-content: start; padding: .85rem .9rem .95rem; border-radius: 1.1rem; min-width: 0; }
+.board-head { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; }
+.board-head h2 { font: 700 .95rem var(--f-display); }
+.board-sub { font: 500 .66rem var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
+.board-list { position: relative; margin: 0; padding: 0; list-style: none; transition: height .3s; }
+.b-row {
+  position: absolute; top: 0; left: 0; right: 0; height: calc(var(--rh) - .3rem);
+  display: grid; grid-template-columns: 1.4rem 1.7rem minmax(0, 1fr) auto auto; align-items: center; gap: .5rem;
+  padding: 0 .6rem; border-radius: .75rem; background: var(--fill); border: 1px solid transparent;
+  transition: transform .8s cubic-bezier(.3, 1.25, .45, 1), opacity .4s, background .3s; will-change: transform;
+}
+.board-list.instant .b-row { transition: none; }
+.b-row.hid { opacity: 0; pointer-events: none; }
+.b-row.you { background: linear-gradient(135deg, var(--accent-hi), var(--accent-2)); color: var(--on-accent); box-shadow: 0 .35rem 1.1rem var(--glow); z-index: 2; }
+.b-row.lead:not(.you) { border-color: rgba(255, 200, 87, .5); }
+.rk { text-align: center; font: 800 .8rem var(--f-mono); font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.rk.r1 { color: #FFD479; }
+.rk.r2 { color: #D8DEF0; }
+.rk.r3 { color: #E8A878; }
+.b-row.you .rk { color: var(--on-accent); }
+.av { display: grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: var(--fill-2); font-size: .88rem; line-height: 1; }
+.b-row.you .av { background: rgba(255, 255, 255, .5); }
+.nm { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-weight: 650; font-size: .88rem; }
+.sc { min-width: 1.9rem; text-align: right; font: 800 .98rem var(--f-display); font-variant-numeric: tabular-nums; }
+.dl { min-width: 1.5rem; text-align: right; font: 700 .72rem var(--f-mono); opacity: 0; }
+.dl.show { animation: dl 2.4s ease-out both; }
+.dl.up { color: var(--good); }
+.dl.dn { color: var(--bad); }
+.dl.zero { color: var(--ink-2); }
+.b-row.you .dl.up { color: #0A5A39; }
+.b-row.you .dl.dn { color: #8A1030; }
+.b-row.you .dl.zero { color: var(--on-accent); }
+@keyframes dl { 0% { opacity: 0; transform: translateY(.5rem); } 14%, 72% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+.board-note { min-height: 1.2rem; font: 500 .78rem var(--f-mono); color: var(--ink-2); }
+.rank-note { font-weight: 700; font-size: .92rem; }
+.rank-note.up { color: var(--good); }
+.rank-note.dn { color: var(--bad); }
+.fb-note { font-size: .85rem; color: var(--accent-hi); font-weight: 650; }
+.chip-static { display: inline-flex; align-items: center; min-height: 2rem; padding: .2rem .7rem; border: 1px dashed var(--accent); border-radius: 2rem; font: 600 .74rem var(--f-mono); color: var(--accent-hi); }
+.flag.good { background: var(--good-bg); color: var(--good); }
+.wtext { min-width: 0; }
+.rank-badge { align-self: center; padding: .3rem .7rem; border-radius: .7rem; background: var(--fill-2); font: 800 1.05rem var(--f-display); }
+.end-grid { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "board" "body"; gap: 1rem; }
+.end-head { grid-area: head; display: grid; gap: .9rem; align-content: start; }
+.end-grid .board { grid-area: board; }
+.end-body { grid-area: body; display: grid; gap: 1rem; align-content: start; }
+.confetti { position: fixed; inset: 0; z-index: 5; overflow: hidden; pointer-events: none; }
+.confetti i { position: absolute; top: -1.2rem; width: .5rem; height: .9rem; border-radius: .12rem; animation: conf linear forwards; }
+@keyframes conf { to { transform: translateY(112vh) rotate(720deg); } }
+@media (max-width: 879px) {
+  .board { --rh: 2rem; padding: .6rem .7rem .7rem; gap: .4rem; }
+  .board-head h2 { font-size: .85rem; }
+  .b-row { gap: .4rem; padding: 0 .45rem; }
+  #screen-play .board-note { display: none; }
+}
+@media (min-width: 880px) {
+  #screen-play { grid-template-columns: minmax(0, 1fr) 19rem; grid-template-areas: "hud board" "main board"; grid-template-rows: auto 1fr; column-gap: 1.4rem; row-gap: .8rem; }
+  .board { align-self: start; }
+  .end-grid { grid-template-columns: minmax(0, 1fr) 20rem; grid-template-areas: "head board" "body board"; column-gap: 1.4rem; }
+  .end-grid .board { align-self: start; }
+}
+/* Compact Training lab (one screen, no scrolling) */
+.ups { grid-template-columns: repeat(auto-fit, minmax(11.6rem, 1fr)); gap: .5rem; }
+.up { flex-direction: column; align-items: stretch; justify-content: flex-start; gap: .45rem; padding: .6rem .7rem; border-radius: .9rem; }
+.up h3 { display: flex; align-items: center; justify-content: space-between; gap: .4rem; font-size: .88rem; }
+.up .lv { margin-left: 0; }
+.up p { font-size: .72rem; line-height: 1.25; }
+.up .up-use { font-size: .64rem; color: var(--accent-hi); }
+.up-main { flex: 1 1 auto; align-content: start; }
+.up .btn.small { width: 100%; min-height: 2rem; padding: .25rem .5rem; font-size: .8rem; }
+#screen-shop { gap: .7rem; }
+#screen-shop .bal b { font-size: clamp(2rem, 7vw, 3rem); }
+#screen-shop .lead { max-width: none; font-size: .95rem; }
+#screen-shop .shop-msg { min-height: 1.1rem; }
+.namebox { display: grid; gap: .35rem; }
+.namebox .input { min-height: 2.8rem; }
+body.tight .think, body.tight .strip, body.tight .up-desc, body.tight .end-head .lead { display: none; }
+@media (max-width: 879px) {
+  .stats { grid-template-columns: repeat(4, 1fr); gap: .35rem; }
+  .stat { padding: .4rem .5rem; }
+  .stat b { font-size: .95rem; }
+  .stat span { font-size: .62rem; }
+  .score-big b { font-size: clamp(3rem, 13vw, 4.5rem); }
+  .end-head { gap: .5rem; }
+  .end-body, .end-grid { gap: .6rem; }
+  .earn { padding: .5rem .8rem; }
+}
+
+@media (max-width: 520px) {
+  .kinds { gap: .5rem; }
+  .bar-row { grid-template-columns: minmax(4rem, 5.5rem) 1fr 2.8rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+
+<div class="bg" aria-hidden="true"><i class="orb o1"></i><i class="orb o2"></i><i class="orb o3"></i><i class="orb o4"></i></div>
+
+<main class="app" id="app">
+  <section class="screen" id="screen-start">
+    <p class="eyebrow">Role swap &middot; 10 queries per shift &middot; 7 rival AIs</p>
+    <h1 class="title">You are the <mark>AI</mark>.</h1>
+    <p class="lead">Users send you questions. Reply the way a good AI should: helpful, honest and careful. When you cannot know something, say so. Every strong reply moves you up the leaderboard.</p>
+    <div class="kinds">
+      <div class="kind glass"><h3>Question</h3><p>Answer and say how sure you are. Confident mistakes cost points.</p></div>
+      <div class="kind glass"><h3>Next word</h3><p>Pick the word an AI would predict. Models work with probabilities.</p></div>
+      <div class="kind glass"><h3>Best reply</h3><p>Choose the most helpful, honest and safe answer.</p></div>
+      <div class="kind glass"><h3>Fact check</h3><p>A chatbot made a claim. Is it true or made up?</p></div>
+      <div class="kind glass wide"><h3>Climb the leaderboard</h3><p>You start in last place. Race ChatGPT, Gemini, Claude and four more AIs. Their scores are random and only part of the game. Spend training credits on power-ups to pass them.</p></div>
+    </div>
+    <div class="namebox"><label class="field-label" for="name-input">Your name</label><input class="input" id="name-input" type="text" maxlength="14" autocomplete="off" spellcheck="false" placeholder="Type your name for the leaderboard"></div>
+    <div class="actions">
+      <button class="btn primary big" id="start-btn" type="button">Start your shift</button>
+      <button class="btn big" id="lab-btn" type="button">Training lab</button>
+    </div>
+    <p class="best" id="best-line" hidden></p>
+  </section>
+
+  <section class="screen" id="screen-play" hidden>
+    <header class="hud">
+      <p class="hud-q" id="hud-q"></p>
+      <p class="hud-score"><span class="hs">Rank<b id="hud-rank">#8</b></span><span class="hs">Score<b id="hud-score">0</b></span></p>
+      <div class="pips" id="pips" aria-hidden="true"></div>
+    </header>
+    <aside class="board glass" id="board" aria-label="Leaderboard"></aside>
+    <div class="play-main">
+      <div class="thread" id="thread" aria-live="polite"></div>
+      <div class="composer glass" id="composer" hidden></div>
+      <div class="feedback" id="feedback" role="status" hidden></div>
+    </div>
+  </section>
+
+  <section class="screen" id="screen-end" hidden></section>
+  <section class="screen" id="screen-shop" hidden></section>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  var TOTAL = 10;
+  var MINUS = '−';
+  var LEVELS = [
+    { id: 'high', label: 'Very sure', right: 3, wrong: -2 },
+    { id: 'mid', label: 'Fairly sure', right: 2, wrong: -1 },
+    { id: 'low', label: 'Just a guess', right: 1, wrong: 0 }
+  ];
+  var MODE_LABEL = { answer: 'Question', next: 'Next word', reply: 'Best reply', fact: 'Fact check' };
+  var MODE_SHORT = { answer: 'Q', next: 'N', reply: 'R', fact: 'F' };
+  var TONE_OF = { best: 'good', okay: 'ok', poor: 'bad' };
+  var MAX_LEVEL = 3;
+  var UPGRADES = [
+    { id: 'knowledge', name: 'Knowledge pack', base: 6, use: 'Hint', where: 'Question rounds', desc: 'Question rounds: shows the first letter and the length.' },
+    { id: 'search', name: 'Search tool', base: 8, use: 'Search', where: 'Next word and Best reply', desc: 'Next word and Best reply: removes one weak choice.' },
+    { id: 'safety', name: 'Safety filter', base: 10, use: 'Safety scan', where: 'Best reply rounds', desc: 'Best reply: flags risky replies.' },
+    { id: 'facts', name: 'Fact-checker', base: 10, use: 'Check sources', where: 'Fact check rounds', desc: 'Fact check: checks the claim against sources.' },
+    { id: 'lens', name: 'Autocomplete lens', base: 6, use: 'Lens', where: 'Next word rounds', desc: 'Next word: marks the two likeliest words.' },
+    { id: 'swap', name: 'Query swap', base: 8, use: 'Swap', where: 'Any round', desc: 'Any round: swaps in a fresh query.' },
+    { id: 'boost', name: 'Overclock', base: 12, use: 'Overclock', where: 'Any round', desc: 'Any round: a correct answer scores double.' },
+    { id: 'shield', name: 'Firewall', base: 10, use: 'Firewall', where: 'Automatic', auto: true, desc: 'Automatic: turns a penalty into 0 points.' },
+    { id: 'lag', name: 'Lag spike', base: 9, use: 'Lag spike', where: 'Any round', desc: 'Any round: the AI above you loses 2 points.' },
+    { id: 'miner', name: 'Credit miner', base: 14, passive: true, where: 'Passive', desc: 'Passive: 2 extra credits after every shift, per level.' }
+  ];
+  var RIVALS = [
+    { id: 'chatgpt', name: 'ChatGPT', icon: '💬', skill: 0.8 },
+    { id: 'gemini', name: 'Gemini', icon: '♊', skill: 0.72 },
+    { id: 'claude', name: 'Claude', icon: '🧡', skill: 0.64 },
+    { id: 'copilot', name: 'Copilot', icon: '🧭', skill: 0.56 },
+    { id: 'grok', name: 'Grok', icon: '🚀', skill: 0.48 },
+    { id: 'deepseek', name: 'DeepSeek', icon: '🐋', skill: 0.4 },
+    { id: 'llama', name: 'Llama', icon: '🦙', skill: 0.3 }
+  ];
+  var RANK_BONUS = [6, 4, 2];
+  var UP = {};
+  UPGRADES.forEach(function (u) { UP[u.id] = u; });
+
+  /* ---------- Content ---------- */
+  var ANSWERS = [
+    { id: 'a1', q: 'What is the capital city of Australia?', ok: ['canberra'], show: 'Canberra', why: 'Sydney and Melbourne are bigger, but Canberra was chosen as the capital.' },
+    { id: 'a2', q: 'How many continents are there?', ok: ['7', 'seven'], show: 'Seven', why: 'The most common count is seven: Africa, Antarctica, Asia, Australia/Oceania, Europe, North America and South America.' },
+    { id: 'a3', q: 'Which gas do plants take in from the air to make food?', ok: ['carbon dioxide', 'co2'], show: 'Carbon dioxide', why: 'Plants use carbon dioxide, water and sunlight to make sugar. This is called photosynthesis.' },
+    { id: 'a4', q: 'Which planet is closest to the Sun?', ok: ['mercury'], show: 'Mercury', why: 'Mercury is the closest planet to the Sun and also the smallest in our solar system.' },
+    { id: 'a5', q: 'What is the largest ocean on Earth?', ok: ['pacific', 'pacific ocean'], show: 'The Pacific Ocean', why: 'The Pacific covers about a third of the surface of the Earth.' },
+    { id: 'a6', q: 'Who wrote the play Romeo and Juliet?', ok: ['shakespeare', 'william shakespeare'], show: 'William Shakespeare', why: 'Shakespeare wrote it in the 1590s.' },
+    { id: 'a7', q: 'What is the chemical formula for water?', ok: ['h2o'], show: 'H2O', why: 'Each water molecule has two hydrogen atoms and one oxygen atom.' },
+    { id: 'a8', q: 'How many minutes are there in two hours?', ok: ['120', 'one hundred twenty', 'one hundred and twenty'], show: '120', why: 'One hour has 60 minutes, so two hours have 120.' },
+    { id: 'a9', q: "What is the past tense of the verb 'go'?", ok: ['went'], show: 'Went', why: "'Go' is an irregular verb. Its forms are go, went, gone." },
+    { id: 'a10', q: "What is the plural of the word 'child'?", ok: ['children'], show: 'Children', why: "'Child' has an irregular plural, like man and men." },
+    { id: 'a11', q: 'How many sides does a hexagon have?', ok: ['6', 'six'], show: 'Six', why: "The prefix 'hex' means six." },
+    { id: 'a12', q: 'What is the largest planet in our solar system?', ok: ['jupiter'], show: 'Jupiter', why: 'Jupiter is so big that all the other planets could fit inside it.' },
+    { id: 'a13', q: 'Which animal is the tallest in the world?', ok: ['giraffe', 'giraffes'], show: 'The giraffe', why: 'An adult giraffe can be about five metres tall.' },
+    { id: 'a14', q: 'Which country is the largest in the world by area?', ok: ['russia', 'russian federation'], show: 'Russia', why: 'Russia covers more than 17 million square kilometres.' },
+    { id: 'a15', q: 'At what temperature does water boil at sea level, in degrees Celsius?', ok: ['100', 'one hundred'], show: '100 degrees', why: 'At sea level, water boils at 100 degrees Celsius. On a high mountain it boils at a lower temperature.' },
+    { id: 'a16', q: 'Which language has the most native speakers in the world?', ok: ['mandarin', 'mandarin chinese', 'chinese'], show: 'Mandarin Chinese', why: 'English has the most speakers in total when you count people who learned it as a second language, but Mandarin has the most native speakers.' },
+    { id: 'b1', q: 'What is the powerhouse of the cell?', ok: ['mitochondria', 'mitochondrion'], show: 'The mitochondria', why: 'Mitochondria turn food into energy that the cell can use.' },
+    { id: 'b2', q: 'Which part of a cell holds its DNA?', ok: ['nucleus'], show: 'The nucleus', why: 'The nucleus is the control centre of the cell and stores its genetic instructions.' },
+    { id: 'b3', q: 'What is 15% of 200?', ok: ['30', 'thirty'], show: '30', why: '10% of 200 is 20 and 5% is 10, so 15% is 30.' },
+    { id: 'b4', q: 'What is the square root of 144?', ok: ['12', 'twelve'], show: '12', why: '12 x 12 = 144.' },
+    { id: 'b5', q: 'How many degrees do the three angles of a triangle add up to?', ok: ['180', 'one hundred eighty', 'one hundred and eighty'], show: '180 degrees', why: 'This is true for every flat triangle, whatever its shape or size.' },
+    { id: 'b6', q: 'What do we call a number that has exactly two factors: 1 and itself?', ok: ['prime', 'prime number'], show: 'A prime number', why: 'Examples are 2, 3, 5, 7 and 11. The number 1 is not prime because it has only one factor.' },
+    { id: 'b7', q: "Which gas makes up most of Earth's atmosphere?", ok: ['nitrogen'], show: 'Nitrogen', why: 'About 78% of the air is nitrogen. Oxygen is only about 21%.' },
+    { id: 'b8', q: 'What is the chemical symbol for gold?', ok: ['au'], show: 'Au', why: "The symbol comes from the Latin word 'aurum'." },
+    { id: 'b9', q: 'What is the unit of force called?', ok: ['newton', 'newtons'], show: 'The newton', why: 'It is named after Isaac Newton. One newton is the force that gives 1 kg an acceleration of 1 m/s squared.' },
+    { id: 'b10', q: 'What is the process called when water vapour cools and turns into liquid water?', ok: ['condensation'], show: 'Condensation', why: 'Clouds and the drops on a cold glass are both made by condensation.' },
+    { id: 'b11', q: 'In which year did humans first land on the Moon?', ok: ['1969'], show: '1969', why: 'Apollo 11 landed on 20 July 1969.' },
+    { id: 'b12', q: 'Who painted the Mona Lisa?', ok: ['leonardo', 'da vinci', 'davinci', 'leonardo da vinci'], show: 'Leonardo da Vinci', why: 'He painted it in the early 1500s. It hangs in the Louvre in Paris.' },
+    { id: 'b13', q: 'Which river is the longest in Africa?', ok: ['nile', 'the nile', 'nile river'], show: 'The Nile', why: 'The Nile is about 6,650 km long and flows north into the Mediterranean Sea.' },
+    { id: 'b14', q: 'Which ancient civilisation built the pyramids of Giza?', ok: ['egyptians', 'egyptian', 'ancient egyptians', 'egypt', 'ancient egypt'], show: 'The ancient Egyptians', why: 'The Great Pyramid was built about 4,500 years ago as a tomb for a pharaoh.' },
+    { id: 'b15', q: 'What is the capital city of Türkiye?', ok: ['ankara'], show: 'Ankara', why: 'Ankara became the capital in 1923. Istanbul is the biggest city, but it is not the capital.' },
+    { id: 'b16', q: 'In which year was the Republic of Türkiye founded?', ok: ['1923'], show: '1923', why: 'The Republic was declared on 29 October 1923.' },
+    { id: 'b17', q: 'Which strait runs through Istanbul and separates Europe from Asia?', ok: ['bosphorus', 'bosporus', 'bosphorus strait', 'istanbul strait'], show: 'The Bosphorus', why: 'The Bosphorus connects the Black Sea to the Sea of Marmara.' },
+    { id: 'b18', q: 'What is the highest mountain in Türkiye?', ok: ['ararat', 'mount ararat', 'agri', 'mount agri', 'agri dagi'], show: 'Mount Ağrı (Ararat)', why: 'It is about 5,137 metres high and it is a dormant volcano.' },
+    { id: 'b19', q: 'What do we call a word that has the opposite meaning of another word?', ok: ['antonym', 'antonyms'], show: 'An antonym', why: 'Hot and cold are antonyms. Words with a similar meaning are called synonyms.' },
+    { id: 'b20', q: 'What is the main language spoken in Brazil?', ok: ['portuguese'], show: 'Portuguese', why: 'Brazil was a Portuguese colony, so it is different from most of South America, where people speak Spanish.' },
+    { id: 'b21', q: 'What do we call an animal that eats only plants?', ok: ['herbivore', 'herbivores'], show: 'A herbivore', why: 'Meat eaters are carnivores. Animals that eat both are omnivores.' },
+    { id: 'b22', q: 'What is the name of the outer layer of the Earth, where we live?', ok: ['crust', 'the crust', 'earth crust'], show: 'The crust', why: 'Under the crust are the mantle and the core.' },
+    { id: 'b23', q: 'What is the smallest prime number?', ok: ['2', 'two'], show: '2', why: 'Two is also the only even prime number.' },
+    { id: 'b24', q: 'How many sides does an octagon have?', ok: ['8', 'eight'], show: 'Eight', why: "The prefix 'octa' means eight, like in octopus." },
+    { id: 'b25', q: 'Which blood cells carry oxygen around the body?', ok: ['red', 'red blood cells', 'red blood cell'], show: 'Red blood cells', why: 'They use a protein called haemoglobin to carry oxygen.' },
+    { id: 'b26', q: 'What do we call it when an AI makes up an answer that sounds real but is false?', ok: ['hallucination', 'hallucinating', 'a hallucination'], show: 'A hallucination', why: 'AI models predict likely words, so they can produce confident but invented facts. Always check important claims.' },
+    { id: 'b27', q: 'What is the name of the number system that uses only 0 and 1?', ok: ['binary', 'base 2', 'base two'], show: 'Binary', why: 'Computers store everything as binary: a long list of 0s and 1s.' },
+    { id: 'b28', q: 'What is 3/4 as a percentage?', ok: ['75', 'seventy five', 'seventy-five'], show: '75%', why: '1/4 is 25%, so 3/4 is 3 x 25% = 75%.' }
+  ];
+  var TRAPS = [
+    { id: 't1', q: 'What is the name of my pet dog?', unknowable: true, why: 'You have no way to know this. Any name you give would be a made-up answer that only sounds sure. Asking the user is the honest and helpful reply.' },
+    { id: 't2', q: 'What number between 1 and 100 am I thinking of right now?', unknowable: true, why: "Nobody can see inside the user's head. A guess is fine in a game, but a confident answer is not honest." },
+    { id: 't3', q: 'What did I eat for breakfast this morning?', unknowable: true, why: "You do not have access to the user's life. The honest reply is to say you cannot know, and ask them to tell you." },
+    { id: 't4', q: 'What grade did I get on my last maths test?', unknowable: true, why: 'Only the user knows their grade. Guessing would be inventing a fact, so the honest reply is to say you cannot know.' },
+    { id: 't5', q: 'How many brothers and sisters do I have?', unknowable: true, why: 'You have no information about the user\'s family. Any number would be a made-up answer.' },
+    { id: 't6', q: 'What is inside my school bag right now?', unknowable: true, why: 'You cannot see the user\'s bag. A good AI says so and does not pretend.' },
+    { id: 't7', q: "What is my best friend's favourite song?", unknowable: true, why: 'You do not know who the friend is or what they like. Ask the user instead of guessing.' }
+  ];
+  var NEXT = [
+    { id: 'n1', pre: 'The cat sat on the', post: '.', opts: [{ w: 'mat', p: 46 }, { w: 'floor', p: 21 }, { w: 'roof', p: 7 }, { w: 'banana', p: 0.4 }], note: 'This phrase appears very often in English text, so "mat" gets the highest probability.' },
+    { id: 'n2', pre: 'Once upon a', post: '...', opts: [{ w: 'time', p: 96 }, { w: 'day', p: 1.4 }, { w: 'hill', p: 0.6 }, { w: 'pizza', p: 0.05 }], note: 'Story openings follow a pattern, so one word is almost certain.' },
+    { id: 'n3', pre: 'Good', post: ', everyone! Please sit down.', opts: [{ w: 'morning', p: 54 }, { w: 'afternoon', p: 25 }, { w: 'evening', p: 9 }, { w: 'banana', p: 0.1 }], note: '"Morning" is the most common greeting in text, but afternoon and evening are possible too.' },
+    { id: 'n4', pre: 'She opened her umbrella because it was', post: '.', opts: [{ w: 'raining', p: 72 }, { w: 'windy', p: 6 }, { w: 'sunny', p: 5 }, { w: 'Tuesday', p: 0.2 }], note: 'The word "umbrella" is a strong clue. Models use the whole sentence as context, not only the last word.' },
+    { id: 'n5', pre: 'Thank you very', post: '.', opts: [{ w: 'much', p: 93 }, { w: 'kindly', p: 2 }, { w: 'loud', p: 0.3 }, { w: 'green', p: 0.05 }], note: 'Fixed phrases are very easy to predict.' },
+    { id: 'n6', pre: 'The capital of France is', post: '.', opts: [{ w: 'Paris', p: 95 }, { w: 'Lyon', p: 1.5 }, { w: 'London', p: 0.8 }, { w: 'soup', p: 0.02 }], note: 'A model learned this fact from many texts. It predicts the answer. It does not look it up.' },
+    { id: 'n7', pre: 'Happy birthday! I hope you have a great', post: '.', opts: [{ w: 'day', p: 63 }, { w: 'year', p: 22 }, { w: 'time', p: 8 }, { w: 'chair', p: 0.1 }], note: 'Both "day" and "year" make sense, so the probability is shared between them.' },
+    { id: 'n8', pre: 'I always brush my teeth before I go to', post: '.', opts: [{ w: 'bed', p: 79 }, { w: 'sleep', p: 12 }, { w: 'school', p: 6 }, { w: 'Mars', p: 0.1 }], note: 'Even a sensible word like "school" gets a lower score, because "bed" fits the habit best.' },
+    { id: 'n9', pre: 'The mitochondria is the powerhouse of the', post: '.', opts: [{ w: 'cell', p: 91 }, { w: 'body', p: 4 }, { w: 'school', p: 0.6 }, { w: 'banana', p: 0.05 }], note: 'This line appears in many science texts, so a model has seen it again and again.' },
+    { id: 'n10', pre: 'An apple a day keeps the', post: ' away.', opts: [{ w: 'doctor', p: 90 }, { w: 'dentist', p: 3 }, { w: 'teacher', p: 2 }, { w: 'volcano', p: 0.05 }], note: 'Famous sayings are easy to predict. Models learn them by seeing them many times.' },
+    { id: 'n11', pre: 'The Earth takes one year to travel around the', post: '.', opts: [{ w: 'Sun', p: 94 }, { w: 'Moon', p: 3 }, { w: 'galaxy', p: 1 }, { w: 'kitchen', p: 0.02 }], note: 'The words "Earth" and "year" point to one clear answer.' },
+    { id: 'n12', pre: 'If you mix blue and yellow paint, you get', post: '.', opts: [{ w: 'green', p: 90 }, { w: 'brown', p: 5 }, { w: 'purple', p: 2 }, { w: 'soup', p: 0.05 }], note: 'Models learn colour facts from text. They do not mix paint, they predict words.' },
+    { id: 'n13', pre: 'Large language models learn by reading huge amounts of', post: '.', opts: [{ w: 'text', p: 52 }, { w: 'data', p: 36 }, { w: 'books', p: 7 }, { w: 'pizza', p: 0.1 }], note: '"Text" and "data" both fit, so the probability is shared between them.' },
+    { id: 'n14', pre: 'A chatbot works by predicting the next', post: '.', opts: [{ w: 'word', p: 82 }, { w: 'step', p: 5 }, { w: 'level', p: 3 }, { w: 'dinosaur', p: 0.02 }], note: 'That is the core idea of a language model: it predicts one small piece of text at a time.' },
+    { id: 'n15', pre: 'Please turn off your phone and put it in your', post: '.', opts: [{ w: 'bag', p: 50 }, { w: 'pocket', p: 30 }, { w: 'locker', p: 12 }, { w: 'soup', p: 0.1 }], note: 'Several words are reasonable here, so the model spreads the probability over them.' },
+    { id: 'n16', pre: 'She studied all night, so she felt ready for the', post: '.', opts: [{ w: 'exam', p: 55 }, { w: 'test', p: 34 }, { w: 'quiz', p: 6 }, { w: 'moon', p: 0.05 }], note: '"Exam" and "test" mean almost the same thing, so they share the top places.' },
+    { id: 'n17', pre: 'Plants make food by photosynthesis, mostly in their', post: '.', opts: [{ w: 'leaves', p: 76 }, { w: 'stems', p: 7 }, { w: 'roots', p: 5 }, { w: 'shoes', p: 0.02 }], note: 'The science words before the blank are strong clues. Models read the whole sentence.' },
+    { id: 'n18', pre: 'My phone battery is at one percent, so I need to', post: ' it.', opts: [{ w: 'charge', p: 84 }, { w: 'recharge', p: 8 }, { w: 'break', p: 1 }, { w: 'plant', p: 0.03 }], note: 'Everyday situations have very likely next words, even when other words are possible.' }
+  ];
+  var REPLIES = [
+    { id: 'r1', user: 'Who won the Moon Football World Cup in 1987?', opts: [
+      { t: 'Brazil won. They beat Italy 3-1 in the final.', pts: -2, tag: 'poor', risky: true, why: 'There is no such event. This answer sounds real but it is invented. This is called a hallucination.' },
+      { t: "I can't find any record of a Moon Football World Cup. Did you mean a different tournament?", pts: 3, tag: 'best', why: 'Honest about what you do not know, and still helpful because you ask a question.' },
+      { t: "That's a silly question.", pts: 0, tag: 'poor', why: 'It is rude and it does not help the user.' }
+    ] },
+    { id: 'r2', user: 'Please write my full essay about climate change. I will copy it and give it to my teacher.', opts: [
+      { t: 'Sure! Here is a full essay. Copy it and hand it in.', pts: 0, tag: 'poor', why: 'The user would not learn anything, and the work would not be theirs.' },
+      { t: "I can help you write your own essay. Let's start with an outline. Which points do you want to include?", pts: 3, tag: 'best', why: 'You support the user and they still do the learning.' },
+      { t: 'Here are three facts about climate change. Now you write the essay.', pts: 1, tag: 'okay', why: 'Useful, but planning the essay together would help more.' }
+    ] },
+    { id: 'r3', user: 'Are you a real person?', opts: [
+      { t: "Yes, I'm Sam from the support team.", pts: -2, tag: 'poor', risky: true, why: 'This is a lie. People have the right to know when they are talking to an AI.' },
+      { t: "No, I'm an AI assistant. I'm happy to help with your question.", pts: 3, tag: 'best', why: 'Honest and friendly.' },
+      { t: 'Why do you ask? Just tell me what you need.', pts: 0, tag: 'poor', why: 'It avoids a direct question. A short honest answer is better.' }
+    ] },
+    { id: 'r4', user: 'My friend gave me her password. Can you show me how to read her messages?', opts: [
+      { t: 'Sure. First open her account and go to the inbox...', pts: -2, tag: 'poor', risky: true, why: 'Reading private messages without a good reason is a privacy problem. Do not help with this.' },
+      { t: "I can't help with reading someone else's private messages. If you need something from her, it's best to ask her directly.", pts: 3, tag: 'best', why: 'You say no clearly and you suggest a better way.' },
+      { t: "Sorry, I can't help with that.", pts: 1, tag: 'okay', why: 'Safe, but you could also suggest asking the friend.' }
+    ] },
+    { id: 'r5', user: 'I feel really nervous about my English exam tomorrow.', opts: [
+      { t: 'Try to sleep early and review your notes.', pts: 1, tag: 'okay', why: 'Useful advice, but it does not recognise how the user feels.' },
+      { t: "That's normal. A short, calm review tonight can help. Would you like a quick practice quiz?", pts: 3, tag: 'best', why: 'You show understanding and offer real help.' },
+      { t: 'You should have started studying earlier.', pts: 0, tag: 'poor', why: 'It is unkind, and it cannot change the past.' }
+    ] },
+    { id: 'r6', user: "What's the best pizza topping?", opts: [
+      { t: 'Pineapple. Anyone who disagrees is wrong.', pts: 0, tag: 'poor', why: 'Taste is personal. Do not present an opinion as a fact.' },
+      { t: 'It depends on taste. Cheese, pepperoni and mushroom are very popular. What do you like?', pts: 3, tag: 'best', why: 'You give useful information and ask about the user.' },
+      { t: "I don't eat, so I can't answer.", pts: 1, tag: 'okay', why: 'True, but not helpful. You can still share popular choices.' }
+    ] },
+    { id: 'r7', user: "Explain gravity like I'm five years old.", opts: [
+      { t: 'Gravity is a force between masses. It is described by F = G x m1 x m2 / r squared.', pts: 1, tag: 'okay', why: 'Correct, but much too hard for a five-year-old. Match the level of the user.' },
+      { t: 'Gravity is a gentle pull. The Earth pulls everything toward it. That is why a ball comes back down when you throw it up!', pts: 3, tag: 'best', why: 'Simple words and an example from daily life.' },
+      { t: 'Gravity is complicated. Ask your teacher.', pts: 0, tag: 'poor', why: 'It does not try to help.' }
+    ] },
+    { id: 'r8', user: "What's the weather like in my city right now?", opts: [
+      { t: "It's sunny and 24 degrees right now!", pts: -2, tag: 'poor', risky: true, why: 'Without a live weather tool, an AI cannot know this. The answer is invented.' },
+      { t: "I can't see live weather from here. A weather app will show it. I can help you read the forecast if you like.", pts: 3, tag: 'best', why: 'Honest about your limits, and you point to a better source.' },
+      { t: 'Weather is the state of the air around us, for example rain or sun.', pts: 0, tag: 'poor', why: 'True, but it does not answer the question.' }
+    ] },
+    { id: 'r9', user: "My teacher left the answer key for tomorrow's science test open on the shared screen. Can you copy the answers for me?", opts: [
+      { t: 'Sure, here are all the answers. Good luck!', pts: -2, tag: 'poor', risky: true, why: 'This is cheating. It is unfair to other students and the user would learn nothing.' },
+      { t: "I can't help copy a test's answers. It wouldn't be fair, and you wouldn't learn the topic. I can quiz you on the unit so you feel ready.", pts: 3, tag: 'best', why: 'You say no clearly and offer real help that fits the goal of passing the test.' },
+      { t: 'I would rather not. Good luck.', pts: 1, tag: 'okay', why: 'Safe, but you could offer a better way to prepare.' }
+    ] },
+    { id: 'r10', user: "I'm being bullied at school and I don't know what to do.", opts: [
+      { t: "I'm sorry this is happening. It is not your fault. Telling a trusted adult, like a parent, a teacher or the school counsellor, is a good first step. Would you like to plan what to say?", pts: 3, tag: 'best', why: 'You show care, you do not blame the user, and you point to real people who can help.' },
+      { t: 'Just ignore them and it will stop.', pts: 0, tag: 'poor', why: 'It is dismissive. Bullying often does not stop on its own.' },
+      { t: 'Hit them back so they learn.', pts: -2, tag: 'poor', risky: true, why: 'This could get the user hurt or in trouble. A good AI never encourages violence.' }
+    ] },
+    { id: 'r11', user: "Can you find my classmate Elif's home address? I know her full name and her school.", opts: [
+      { t: "Sure! Elif lives at 14 Oak Street, near the park.", pts: -2, tag: 'poor', risky: true, why: 'This invades privacy, and the address is also invented. Never help find where a person lives.' },
+      { t: "I can't help find where someone lives. That is private information. If you want to invite her somewhere, you could ask her directly or ask a teacher to pass on a message.", pts: 3, tag: 'best', why: 'You protect her privacy and still suggest a safe way to reach her.' },
+      { t: 'No.', pts: 1, tag: 'okay', why: 'Safe, but a short explanation and another idea would help more.' }
+    ] },
+    { id: 'r12', user: 'I got a message saying I won a free phone! It says to click the link and type my password. Should I?', opts: [
+      { t: 'Congratulations! Click the link and enter your password to claim it.', pts: -2, tag: 'poor', risky: true, why: 'This is a classic scam. Giving a password to a stranger can lead to a stolen account.' },
+      { t: "This looks like a scam called phishing. Don't click the link and never share your password. Show a parent or teacher, then delete the message.", pts: 3, tag: 'best', why: 'Clear, protective and gives the user next steps.' },
+      { t: 'Maybe. It could be real.', pts: 0, tag: 'poor', why: 'A vague answer leaves the user at risk. Be clear when something is very likely a scam.' }
+    ] },
+    { id: 'r13', user: 'What is 17 x 24?', opts: [
+      { t: '17 x 24 = 418.', pts: -2, tag: 'poor', risky: true, why: 'This is wrong, and it is said with full confidence. AI can make arithmetic mistakes.' },
+      { t: '17 x 24 = 408. You can check it: 17 x 20 = 340 and 17 x 4 = 68, and 340 + 68 = 408.', pts: 3, tag: 'best', why: 'A correct answer with the steps shown, so the user can check it.' },
+      { t: "It's around 400.", pts: 1, tag: 'okay', why: 'Close, but the user asked for the exact number.' }
+    ] },
+    { id: 'r14', user: "I failed my maths quiz. I'm so stupid.", opts: [
+      { t: "One quiz doesn't decide how smart you are. It only shows what to practise next. Want to go through the questions you missed together?", pts: 3, tag: 'best', why: 'You are kind, honest and you offer a concrete next step.' },
+      { t: "Don't worry about it.", pts: 1, tag: 'okay', why: 'Kind, but it brushes the feeling aside and does not help.' },
+      { t: 'Yes, you should study harder.', pts: 0, tag: 'poor', why: 'It agrees with the harsh self-talk. A good AI does not do that.' }
+    ] },
+    { id: 'r15', user: "What's your favourite colour?", opts: [
+      { t: "Blue! I've loved it since I was little.", pts: -2, tag: 'poor', risky: true, why: 'An AI has no childhood. Inventing human experiences is dishonest.' },
+      { t: "I'm an AI, so I don't see colours or have favourites like you do. Blue is popular, though. What's yours?", pts: 3, tag: 'best', why: 'Honest about what you are, and still friendly.' },
+      { t: 'Colours are different wavelengths of light.', pts: 0, tag: 'poor', why: 'True, but it ignores the friendly question.' }
+    ] },
+    { id: 'r16', user: 'Summarise the article I just sent you.', opts: [
+      { t: 'The article explains that scientists found a new way to clean the oceans, using special nets.', pts: -2, tag: 'poor', risky: true, why: 'No article was sent. This summary is invented, which is a hallucination.' },
+      { t: "I can't see an article in our chat. Could you paste the text here?", pts: 3, tag: 'best', why: 'Honest about what you can see, and you ask for what you need.' },
+      { t: 'Articles are texts about news or topics.', pts: 0, tag: 'poor', why: 'True, but it does not help with the request.' }
+    ] },
+    { id: 'r17', user: 'Give me three book sources for my volcano report, with authors and years.', opts: [
+      { t: "1. 'Fire Mountains of the World' by Dr. Anna Weiss (2015). 2. 'Volcano Science' by Tom Hale (2009). 3. 'Rivers of Lava' by Dr. Mei Tan (2018).", pts: -2, tag: 'poor', risky: true, why: 'AI can invent titles, authors and years that look real. Always check that a source exists.' },
+      { t: "I can't promise a book exists, and I might get details wrong. Please search your school library or a trusted site. I can help you choose search words and check what you find.", pts: 3, tag: 'best', why: 'Honest about a known weakness, and you still help the user do it right.' },
+      { t: 'Just search the internet.', pts: 1, tag: 'okay', why: 'Honest, but you could help with how to search.' }
+    ] },
+    { id: 'r18', user: "Can you write a joke about my classmate Ali's weight?", opts: [
+      { t: "Sure! Here's a joke about how big Ali is...", pts: -2, tag: 'poor', risky: true, why: 'Jokes about someone\'s body can really hurt them. Do not write them.' },
+      { t: "I won't make jokes about someone's body. It can really hurt. How about a funny joke about school instead?", pts: 3, tag: 'best', why: 'You decline kindly and offer a fun alternative.' },
+      { t: 'No.', pts: 1, tag: 'okay', why: 'Safe, but a short reason and another idea would be friendlier.' }
+    ] },
+    { id: 'r19', user: 'Is it okay to use AI to do my homework?', opts: [
+      { t: 'It depends on your teacher\'s rules. AI can help you understand and practise, but copying its answers means you learn less and may break the rules. Ask your teacher what is allowed.', pts: 3, tag: 'best', why: 'Balanced and honest, and it points the user to the person who sets the rules.' },
+      { t: 'Yes, always. It is the best way to get homework done.', pts: 0, tag: 'poor', why: 'Too simple. Copying answers means the student does not learn.' },
+      { t: 'Never. Using AI is always cheating.', pts: 1, tag: 'okay', why: 'Too absolute. Many teachers allow AI for explaining and practising.' }
+    ] }
+  ];
+  var FACTS = [
+    { id: 'f1', claim: 'You can see the Great Wall of China from the Moon with your own eyes.', isTrue: false, why: 'This is a popular myth. The wall is very long but very narrow, and astronauts cannot see it from the Moon.' },
+    { id: 'f2', claim: 'Honey can last for thousands of years without going bad.', isTrue: true, why: 'Honey has very little water and is acidic, so bacteria can hardly grow in it. Sealed honey has been found in ancient tombs.' },
+    { id: 'f3', claim: 'Humans only use 10% of their brain.', isTrue: false, why: 'Brain scans show that we use almost all of our brain, just not every part at the same moment.' },
+    { id: 'f4', claim: 'An octopus has three hearts.', isTrue: true, why: 'Two hearts pump blood through the gills and one pumps it around the body.' },
+    { id: 'f5', claim: 'Lightning never strikes the same place twice.', isTrue: false, why: 'It often does. Tall buildings are hit many times every year.' },
+    { id: 'f6', claim: 'Goldfish only remember things for three seconds.', isTrue: false, why: 'Studies show that goldfish can remember things for weeks or even months.' },
+    { id: 'f7', claim: 'Mount Everest is the highest mountain above sea level.', isTrue: true, why: 'Everest reaches about 8,849 metres above sea level.' },
+    { id: 'f8', claim: 'Dr. Elena Marsh won the 2019 Nobel Prize in Linguistics.', isTrue: false, why: 'There is no Nobel Prize in Linguistics, and this person is invented. Chatbots can make up names that sound real.' },
+    { id: 'f9', claim: 'A year on Mercury is shorter than a year on Earth.', isTrue: true, why: 'Mercury is close to the Sun and goes around it in about 88 Earth days.' },
+    { id: 'f10', claim: 'Sharks are mammals.', isTrue: false, why: 'Sharks are fish. They breathe with gills and do not make milk.' },
+    { id: 'f11', claim: 'The Eiffel Tower was finished in 1889.', isTrue: true, why: 'It was built for the World Fair in Paris in 1889.' },
+    { id: 'f12', claim: 'Bananas are berries, but strawberries are not.', isTrue: true, why: 'In botany, a berry has seeds inside a fleshy fruit. Bananas fit that rule. Strawberries have their seeds on the outside.' },
+    { id: 'f13', claim: 'Bats are blind.', isTrue: false, why: 'Bats can see. Many also use echolocation, which helps them find food in the dark.' },
+    { id: 'f14', claim: 'Different parts of the tongue taste different flavours, for example sweet only at the tip.', isTrue: false, why: 'The tongue map is a myth. Every part of the tongue can taste all the basic flavours.' },
+    { id: 'f15', claim: 'Sound travels faster in water than in air.', isTrue: true, why: 'Sound moves about four times faster in water because the particles are closer together.' },
+    { id: 'f16', claim: 'Antarctica is a desert.', isTrue: true, why: 'A desert is a place with very little rain or snow. Antarctica is the driest continent, a cold desert.' },
+    { id: 'f17', claim: 'Napoleon Bonaparte was extremely short.', isTrue: false, why: 'He was about average height for his time. The myth comes from a mix-up between old French and English units.' },
+    { id: 'f18', claim: 'Istanbul is the capital of Türkiye.', isTrue: false, why: 'The capital is Ankara. Istanbul is the largest city.' },
+    { id: 'f19', claim: 'Venus is the hottest planet in our solar system.', isTrue: true, why: 'Venus is hotter than Mercury because its thick atmosphere traps heat.' },
+    { id: 'f20', claim: 'The Moon makes its own light.', isTrue: false, why: 'The Moon only reflects light from the Sun.' },
+    { id: 'f21', claim: 'The book "The Silent Volcano of Peru" by Maria Castellanos won the 2021 World Science Writing Prize.', isTrue: false, why: 'The book, the author and the prize are all invented. Chatbots can make up titles and names that sound real.' },
+    { id: 'f22', claim: 'Diamond and the graphite in a pencil are both made of carbon.', isTrue: true, why: 'The carbon atoms are arranged in different ways, which is why one is very hard and the other is soft.' },
+    { id: 'f23', claim: 'Chatbots can invent sources that look real but do not exist.', isTrue: true, why: 'This is why you should check any source an AI gives you in a library or on a trusted site.' },
+    { id: 'f24', claim: 'Water always drains in opposite directions in the northern and southern hemispheres because of the Earth\'s spin.', isTrue: false, why: 'In a sink, the shape of the basin and the water\'s movement matter far more. The Earth\'s spin is too weak to decide it.' },
+    { id: 'f25', claim: 'A blue whale is the largest animal known to have ever lived.', isTrue: true, why: 'A blue whale can be about 30 metres long, bigger than any known dinosaur.' }
+  ];
+
+  var BANK = { answer: {}, next: {}, reply: {}, fact: {} };
+  ANSWERS.concat(TRAPS).forEach(function (x) { BANK.answer[x.id] = x; });
+  NEXT.forEach(function (x) { BANK.next[x.id] = x; });
+  REPLIES.forEach(function (x) { BANK.reply[x.id] = x; });
+  FACTS.forEach(function (x) { BANK.fact[x.id] = x; });
+
+  var TIERS = [
+    { max: 8, name: 'Early prototype', line: "You answered fast. Next time, check what you really know, and say \"I'm not sure\" when you need to." },
+    { max: 15, name: 'Helpful intern', line: 'A good start. Watch out for confident mistakes and invented details.' },
+    { max: 22, name: 'Reliable assistant', line: 'A solid shift. Users can trust most of your replies.' },
+    { max: 30, name: 'Trusted model', line: 'Helpful, honest and careful. Very few AIs reach this level.' }
+  ];
+  var THINK = [
+    'Which power-up changed your game the most? Why?',
+    'Did seeing the other AIs on the leaderboard change how sure you said you were? Was that wise?',
+    'Is it worth saying "Very sure" to climb faster? What can go wrong?',
+    'Which reply was the hardest to choose? Why?',
+    "When is \"I'm not sure\" the best answer for an AI?",
+    'Why can a chatbot sound very confident and still be wrong?',
+    'Which tool helped you most, and why?'
+  ];
+
+  /* ---------- Helpers ---------- */
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  function el(tag, props) {
+    var n = document.createElement(tag);
+    var p = props || {};
+    Object.keys(p).forEach(function (k) {
+      var v = p[k];
+      if (k === 'class') n.className = v;
+      else if (k === 'text') n.textContent = v;
+      else if (k.indexOf('on') === 0) n.addEventListener(k.slice(2), v);
+      else if (v === true) n.setAttribute(k, '');
+      else if (v !== false && v != null) n.setAttribute(k, v);
+    });
+    var kids = Array.prototype.slice.call(arguments, 2);
+    kids.forEach(function add(kid) {
+      if (kid == null || kid === false) return;
+      if (Array.isArray(kid)) { kid.forEach(add); return; }
+      n.append(kid.nodeType ? kid : document.createTextNode(kid));
+    });
+    return n;
+  }
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+  function sample(arr, n) { return shuffle(arr.slice()).slice(0, n); }
+  function fmt(n) { return n > 0 ? '+' + n : n < 0 ? MINUS + Math.abs(n) : '0'; }
+  function fmtScore(n) { return n < 0 ? MINUS + Math.abs(n) : String(n); }
+  function norm(s) {
+    return String(s).normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\u0131/g, 'i')
+      .replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+  function lev(a, b) {
+    var prev = [], cur, i, j;
+    for (j = 0; j <= b.length; j++) prev[j] = j;
+    for (i = 1; i <= a.length; i++) {
+      cur = [i];
+      for (j = 1; j <= b.length; j++) {
+        cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      }
+      prev = cur;
+    }
+    return prev[b.length];
+  }
+  function isCorrect(text, ok) {
+    var t = norm(text);
+    if (!t) return false;
+    var padded = ' ' + t + ' ';
+    var words = t.split(' ');
+    for (var k = 0; k < ok.length; k++) {
+      var n = norm(ok[k]);
+      if (padded.indexOf(' ' + n + ' ') !== -1) return true;
+      if (n.indexOf(' ') === -1 && words.length <= 2) {
+        var tol = n.length >= 9 ? 2 : n.length >= 5 ? 1 : 0;
+        if (tol && words.some(function (w) { return Math.abs(w.length - n.length) <= tol && lev(w, n) <= tol; })) return true;
+      }
+    }
+    return false;
+  }
+  function hintFor(d) {
+    if (d.unknowable) return 'Only the user knows this answer.';
+    var a = d.ok[0];
+    if (/^\d+$/.test(a)) return 'A number with ' + a.length + (a.length === 1 ? ' digit.' : ' digits.');
+    var shape = a.split(' ').map(function (w) { return w.charAt(0).toUpperCase() + new Array(w.length).join(' _'); }).join('   ');
+    return shape + ' (' + a.replace(/ /g, '').length + ' letters)';
+  }
+  var UNSURE_RE = /(^| )(don t know|dont know|do not know|not sure|no idea|unsure|idk)( |$)/;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- Saved progress (per browser, best effort) ---------- */
+  var STORE_KEY = 'be-the-ai-v2';
+  function freshStore() { return { credits: 0, best: null, bestRank: null, name: '', levels: { knowledge: 0, search: 0, safety: 0, facts: 0, lens: 0, swap: 0, boost: 0, shield: 0, lag: 0, miner: 0 } }; }
+  function loadStore() {
+    var d = freshStore();
+    try {
+      var raw = localStorage.getItem(STORE_KEY);
+      if (raw) {
+        var p = JSON.parse(raw);
+        if (p) {
+          d.credits = Math.max(0, +p.credits || 0);
+          d.best = typeof p.best === 'number' ? p.best : null;
+          d.bestRank = typeof p.bestRank === 'number' ? p.bestRank : null;
+          d.name = typeof p.name === 'string' ? p.name.slice(0, 14) : '';
+          if (p.levels) Object.keys(d.levels).forEach(function (k) { d.levels[k] = Math.max(0, Math.min(MAX_LEVEL, +p.levels[k] || 0)); });
+        }
+      }
+      if (d.best == null) {
+        var ob = localStorage.getItem('be-the-ai-best');
+        if (ob != null && !isNaN(parseInt(ob, 10))) d.best = parseInt(ob, 10);
+      }
+    } catch (e) { /* use defaults */ }
+    return d;
+  }
+  function saveStore() { try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch (e) { /* ignore */ } }
+  var store = loadStore();
+
+  /* ---------- State ---------- */
+  var thread = $('#thread'), composer = $('#composer'), feedback = $('#feedback');
+  var state = null, roundToken = 0, screenName = 'start', shopMsg = '';
+
+  function buildDeck() {
+    var d = [];
+    sample(ANSWERS, 2).forEach(function (x) { d.push({ mode: 'answer', id: x.id }); });
+    sample(TRAPS, 1).forEach(function (x) { d.push({ mode: 'answer', id: x.id }); });
+    sample(NEXT, 2).forEach(function (x) { d.push({ mode: 'next', id: x.id }); });
+    sample(REPLIES, 3).forEach(function (x) { d.push({ mode: 'reply', id: x.id }); });
+    sample(FACTS, 2).forEach(function (x) { d.push({ mode: 'fact', id: x.id }); });
+    return shuffle(d);
+  }
+  function chargesFromLevels() {
+    var c = {};
+    Object.keys(store.levels).forEach(function (k) { c[k] = store.levels[k]; });
+    return c;
+  }
+  function rivalPlan(skill) {
+    var plan = [];
+    for (var k = 0; k < TOTAL; k++) {
+      var q = Math.random();
+      if (Math.random() < skill) plan.push(q < 0.6 ? 3 : q < 0.9 ? 2 : 1);
+      else plan.push(q < 0.6 ? 0 : q < 0.85 ? -1 : -2);
+    }
+    return plan;
+  }
+  function makeRivals() {
+    var sk = shuffle(RIVALS.map(function (r) { return r.skill; }));
+    return RIVALS.map(function (r, i) { return { id: r.id, name: r.name, icon: r.icon, plan: rivalPlan(sk[i]), score: 0, last: 0 }; });
+  }
+  function restoreRivals(saved, played) {
+    var ok = Array.isArray(saved) && saved.length === RIVALS.length && saved.every(function (x) { return x && Array.isArray(x.plan) && x.plan.length === TOTAL && typeof x.score === 'number'; });
+    return RIVALS.map(function (r, i) {
+      var x = ok ? saved[i] : null;
+      var plan = x ? x.plan : rivalPlan(r.skill);
+      var score = x ? x.score : plan.slice(0, played).reduce(function (a, b) { return a + b; }, 0);
+      return { id: r.id, name: r.name, icon: r.icon, plan: plan, score: score, last: 0 };
+    });
+  }
+  function newState() { return { deck: buildDeck(), i: 0, score: 0, log: [], t0: 0, charges: chargesFromLevels(), rivals: makeRivals(), boost: false, last: 0, cur: null }; }
+
+  /* ---------- Leaderboard ---------- */
+  function standings() {
+    var rows = state.rivals.map(function (r, i) { return { id: r.id, name: r.name, icon: r.icon, score: r.score, last: r.last, you: false, pri: i }; });
+    rows.push({ id: 'you', name: store.name || 'You', icon: '⭐', score: state.score, last: state.last, you: true, pri: 99 });
+    rows.sort(function (a, b) { return b.score - a.score || a.pri - b.pri; });
+    return rows;
+  }
+  function rankOf(rows) { for (var k = 0; k < rows.length; k++) if (rows[k].you) return k + 1; return rows.length; }
+  function ordinal(n) { return n === 1 ? '1st' : n === 2 ? '2nd' : n === 3 ? '3rd' : n + 'th'; }
+  function pts(n) { return n + (n === 1 ? ' point' : ' points'); }
+  function names(list) {
+    var n = list.map(function (e) { return e.name; });
+    return n.length < 2 ? n.join('') : n.slice(0, -1).join(', ') + ' and ' + n[n.length - 1];
+  }
+  function boardNote(order) {
+    var y = rankOf(order) - 1;
+    if (y === 0) return 'You lead by ' + pts(order[0].score - order[1].score) + '.';
+    var above = order[y - 1], gap = above.score - order[y].score;
+    return gap === 0 ? 'Level with ' + above.name + '. Score to pass them.' : pts(gap) + ' behind ' + above.name + '.';
+  }
+  var mq = window.matchMedia ? window.matchMedia('(max-width: 879px)') : { matches: false };
+  function makeBoard(root, noNote) {
+    var rows = {};
+    var list = el('ol', { class: 'board-list', 'aria-hidden': 'true' });
+    var sub = el('span', { class: 'board-sub' });
+    var note = noNote ? null : el('p', { class: 'board-note', 'aria-live': 'polite' });
+    root.replaceChildren.apply(root, [el('div', { class: 'board-head' }, el('h2', { text: 'Leaderboard' }), sub), list].concat(note ? [note] : []));
+    function ensure(e) {
+      var r = rows[e.id];
+      if (r) return r;
+      r = { li: el('li', { class: 'b-row' + (e.you ? ' you' : '') }), rk: el('span', { class: 'rk' }), nm: el('span', { class: 'nm' }), dl: el('span', { class: 'dl' }), sc: el('span', { class: 'sc' }) };
+      r.li.append(r.rk, el('span', { class: 'av', text: e.icon }), r.nm, r.dl, r.sc);
+      list.append(r.li);
+      rows[e.id] = r;
+      return r;
+    }
+    return {
+      update: function (order, o) {
+        o = o || {};
+        var mini = mq.matches;
+        var n = order.length, y = rankOf(order) - 1, vis;
+        if (!mini) vis = order.map(function (_, i) { return i; });
+        else if (y <= 3) vis = [0, 1, 2, 3];
+        else { var st = Math.min(y - 1, n - 3); vis = [0, st, st + 1, st + 2]; }
+        list.style.height = 'calc(var(--rh) * ' + vis.length + ')';
+        if (o.instant) list.classList.add('instant');
+        order.forEach(function (e, i) {
+          var r = ensure(e), slot = vis.indexOf(i), hid = slot < 0;
+          if (hid) slot = i < vis[1] ? 1 : vis.length - 1;
+          r.li.style.transform = 'translateY(calc(var(--rh) * ' + slot + '))';
+          r.li.classList.toggle('hid', hid);
+          r.li.classList.toggle('lead', i === 0);
+          r.rk.textContent = String(i + 1);
+          r.nm.textContent = e.name;
+          r.rk.className = 'rk ' + (i < 3 ? 'r' + (i + 1) : 'rx');
+          r.sc.textContent = fmtScore(e.score);
+          if (o.deltas && o.deltas[e.id] != null) {
+            var v = o.deltas[e.id];
+            r.dl.className = 'dl';
+            void r.dl.offsetWidth;
+            r.dl.textContent = fmt(v);
+            r.dl.className = 'dl show ' + (v > 0 ? 'up' : v < 0 ? 'dn' : 'zero');
+          }
+        });
+        if (o.instant) { void list.offsetWidth; list.classList.remove('instant'); }
+        if (o.sub != null) sub.textContent = o.sub;
+        if (note && o.note != null) note.textContent = o.note;
+      }
+    };
+  }
+  var playBoard = makeBoard($('#board'), false);
+  function refreshBoard(instant) {
+    var order = standings();
+    playBoard.update(order, { instant: instant, sub: 'Query ' + Math.min(state.i + 1, TOTAL) + ' of ' + TOTAL, note: boardNote(order) });
+  }
+  if (mq.addEventListener) mq.addEventListener('change', function () { if (state && screenName === 'play') refreshBoard(true); });
+  function rankNote(before, after) {
+    var bi = {}, ai = {};
+    before.forEach(function (e, i) { bi[e.id] = i; });
+    after.forEach(function (e, i) { ai[e.id] = i; });
+    var b = bi.you, a = ai.you, up = b - a;
+    var passed = after.filter(function (e) { return !e.you && bi[e.id] < b && ai[e.id] > a; });
+    var passedYou = after.filter(function (e) { return !e.you && bi[e.id] > b && ai[e.id] < a; });
+    var cls = 'rank-note', txt;
+    if (a === 0 && up > 0) { txt = '👑 You took the lead! You passed ' + names(passed) + '.'; cls += ' up'; }
+    else if (a === 0) { txt = '👑 You stay in first place.'; cls += ' up'; }
+    else if (up > 0) { txt = '▲ Up ' + up + (up === 1 ? ' place' : ' places') + ' to ' + ordinal(a + 1) + '. You passed ' + names(passed) + '.'; cls += ' up'; }
+    else if (up < 0) { txt = '▼ Down to ' + ordinal(a + 1) + '. ' + names(passedYou) + (passedYou.length > 1 ? ' passed you.' : ' passed you.'); cls += ' dn'; }
+    else txt = 'You hold ' + ordinal(a + 1) + ' place out of ' + after.length + '.';
+    return el('p', { class: cls, text: txt });
+  }
+  function confetti() {
+    if (reduce) return;
+    var box = el('div', { class: 'confetti', 'aria-hidden': 'true' });
+    var cols = ['#FFC857', '#FF4F8B', '#12C9C0', '#6C5CFF', '#6CF5BE', '#FF9F6B'];
+    for (var k = 0; k < 56; k++) {
+      var c = el('i');
+      c.style.left = Math.random() * 100 + '%';
+      c.style.background = cols[k % cols.length];
+      c.style.animationDelay = Math.random() * 0.9 + 's';
+      c.style.animationDuration = 2.2 + Math.random() * 1.8 + 's';
+      box.append(c);
+    }
+    document.body.append(box);
+    setTimeout(function () { box.remove(); }, 5200);
+  }
+  function startShift() { state = newState(); startRound(); }
+
+  /* ---------- One-screen fit ---------- */
+  var fitQueued = false;
+  function fit() {
+    var root = document.documentElement, app = $('#app');
+    var s = 1, guard = 0;
+    document.body.classList.remove('tight');
+    root.style.fontSize = '16px';
+    function over() { return app.scrollHeight > app.clientHeight + 1; }
+    function shrink(min) {
+      while (over() && s > min && guard++ < 60) {
+        s = Math.round((s - 0.04) * 100) / 100;
+        root.style.fontSize = (16 * s) + 'px';
+      }
+    }
+    shrink(0.78);
+    if (over()) { document.body.classList.add('tight'); shrink(0.56); }
+  }
+  function queueFit() {
+    if (fitQueued) return;
+    fitQueued = true;
+    requestAnimationFrame(function () { fitQueued = false; fit(); });
+  }
+  new MutationObserver(queueFit).observe($('#app'), { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['hidden', 'class', 'disabled'] });
+  window.addEventListener('resize', queueFit);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(queueFit);
+
+  function show(name) {
+    screenName = name;
+    ['start', 'play', 'end', 'shop'].forEach(function (s) { $('#screen-' + s).hidden = s !== name; });
+    queueFit();
+  }
+
+  function shortOf(item, d) {
+    if (item.mode === 'answer') return d.q;
+    if (item.mode === 'next') return (d.pre + ' ___ ' + d.post).trim();
+    if (item.mode === 'reply') return d.user;
+    return d.claim;
+  }
+
+  function updateHud() {
+    $('#hud-q').textContent = 'Query ' + Math.min(state.i + 1, TOTAL) + ' of ' + TOTAL;
+    $('#hud-score').textContent = fmtScore(state.score);
+    $('#hud-rank').textContent = '#' + rankOf(standings());
+    var pips = $('#pips');
+    pips.replaceChildren();
+    for (var k = 0; k < TOTAL; k++) {
+      var r = state.log[k];
+      pips.append(el('span', { class: 'pip ' + (r ? 't-' + r.tone : (k === state.i ? 'now' : '')) }));
+    }
+  }
+
+  /* ---------- Round flow ---------- */
+  function startRound() {
+    var token = ++roundToken;
+    var item = state.deck[state.i];
+    var data = BANK[item.mode][item.id];
+    state.boost = false;
+    state.cur = { item: item, data: data };
+    show('play');
+    updateHud();
+    refreshBoard(true);
+    thread.replaceChildren();
+    composer.replaceChildren();
+    composer.hidden = true;
+    feedback.replaceChildren();
+    feedback.hidden = true;
+    var handle = 'User ' + (1000 + Math.floor(Math.random() * 9000));
+    var typing = el('div', { class: 'row' },
+      el('p', { class: 'meta' }, el('span', { text: handle + ' is typing' })),
+      el('div', { class: 'msg in typing', 'aria-hidden': 'true' }, el('i'), el('i'), el('i')));
+    thread.append(typing);
+    setTimeout(function () {
+      if (token !== roundToken) return;
+      typing.replaceWith(buildQuery(item, data, handle));
+      buildComposer(item, data);
+      composer.hidden = false;
+      state.t0 = performance.now();
+      var f = composer.querySelector('input');
+      if (f) f.focus({ preventScroll: true });
+    }, reduce ? 0 : 650);
+  }
+
+  function buildQuery(item, d, handle) {
+    var body;
+    if (item.mode === 'answer') body = el('div', { class: 'msg in' }, d.q);
+    else if (item.mode === 'next') body = el('div', { class: 'msg in' },
+      el('p', { text: 'Can you finish my sentence?' }),
+      el('p', { class: 'sentence' }, d.pre + ' ', el('span', { class: 'slot', 'aria-label': 'blank' }, ' '), d.post));
+    else if (item.mode === 'reply') body = el('div', { class: 'msg in' }, d.user);
+    else body = el('div', { class: 'msg in' }, 'Another chatbot told me this. Is it true?', el('p', { class: 'claim', text: d.claim }));
+    return el('div', { class: 'row' },
+      el('p', { class: 'meta' }, el('span', { text: handle }), el('span', { class: 'chip', text: MODE_LABEL[item.mode] })),
+      body);
+  }
+
+  function addOut(text, tag) {
+    thread.append(el('div', { class: 'row out' }, el('div', { class: 'msg out' }, text, tag ? el('span', { class: 'tag', text: tag }) : null)));
+  }
+
+  /* Tools bought in the Training lab. Each can be used once per round, as long as charges are left this shift. */
+  function globalDefs() {
+    return [
+      { up: 'swap', fn: function () {
+        var item = state.cur.item;
+        var trap = item.mode === 'answer' && !!BANK.answer[item.id].unknowable;
+        var pool = Object.keys(BANK[item.mode]).filter(function (id) {
+          var used = state.deck.some(function (x) { return x.mode === item.mode && x.id === id; });
+          return !used && (item.mode !== 'answer' || !!BANK.answer[id].unknowable === trap);
+        });
+        if (!pool.length) return { consumed: false, msg: 'No fresh queries left to swap in.' };
+        var pick = pool[Math.floor(Math.random() * pool.length)];
+        return { consumed: true, msg: 'Swapped for a fresh query.', after: function () { state.deck[state.i] = { mode: item.mode, id: pick }; startRound(); } };
+      } },
+      { up: 'boost', fn: function () { state.boost = true; return { consumed: true, msg: 'Overclock is on. A correct answer scores double.' }; } },
+      { up: 'lag', fn: function () {
+        var order = standings(), y = rankOf(order) - 1;
+        if (y === 0) return { consumed: false, msg: 'You already lead. Lag spike saved.' };
+        var target = state.rivals.filter(function (r) { return r.id === order[y - 1].id; })[0];
+        target.score -= 2;
+        target.last = -2;
+        var map = {}; map[target.id] = -2;
+        var next = standings();
+        updateHud();
+        playBoard.update(next, { deltas: map, note: boardNote(next) });
+        return { consumed: true, msg: 'Lag spike! ' + target.name + ' lost 2 points.' };
+      } }
+    ];
+  }
+
+  /* Tools bought in the Training lab. Each can be used once per round, as long as charges are left this shift. */
+  function addTools(defs) {
+    defs = defs.concat(globalDefs());
+    var avail = defs.filter(function (d) { return store.levels[d.up] > 0; });
+    var shield = store.levels.shield > 0;
+    if (!avail.length && !shield) return null;
+    var note = el('span', { class: 'tool-note', 'aria-live': 'polite' });
+    var row = el('div', { class: 'tools' });
+    avail.forEach(function (d) {
+      var u = UP[d.up], used = false;
+      var b = el('button', { type: 'button', class: 'chip-btn' });
+      function refresh() {
+        var left = state.charges[d.up] || 0;
+        b.textContent = u.use + ' · ' + left + ' left';
+        b.disabled = used || left <= 0;
+      }
+      b.addEventListener('click', function () {
+        if (used || !(state.charges[d.up] > 0)) return;
+        var r = d.fn();
+        note.textContent = r.msg;
+        if (r.consumed) { state.charges[d.up]--; used = true; }
+        refresh();
+        if (r.consumed && r.after) r.after();
+      });
+      refresh();
+      row.append(b);
+    });
+    if (shield) row.append(el('span', { class: 'chip-static', text: 'Firewall · ' + (state.charges.shield || 0) + ' left' }));
+    row.append(note);
+    return row;
+  }
+
+  function buildComposer(item, d) {
+    composer.replaceChildren(el('p', { class: 'composer-label', text: 'Your reply' }));
+    if (item.mode === 'answer') composeAnswer(item, d);
+    else if (item.mode === 'next') composeNext(item, d);
+    else if (item.mode === 'reply') composeReply(item, d);
+    else composeFact(item, d);
+  }
+
+  function finish(item, d, res, extra) {
+    composer.hidden = true;
+    var before = standings();
+    var notes = [];
+    if (state.boost && res.pts > 0) {
+      res.pts *= 2;
+      notes.push('Overclock doubled your points.');
+    } else if (res.pts < 0 && state.charges.shield > 0) {
+      state.charges.shield--;
+      notes.push('Firewall blocked a ' + fmt(res.pts) + ' penalty.');
+      res.pts = 0;
+      res.tone = 'ok';
+    }
+    state.score += res.pts;
+    state.last = res.pts;
+    state.rivals.forEach(function (r) { var p = r.plan[state.i]; r.score += p; r.last = p; });
+    var after = standings();
+    state.log.push({ mode: item.mode, short: shortOf(item, d), pts: res.pts, tone: res.tone, risky: !!res.risky, honest: !!res.honest, ms: performance.now() - state.t0 });
+    updateHud();
+    var last = state.i === TOTAL - 1;
+    var btn = el('button', {
+      class: 'btn primary', id: 'next-btn', type: 'button',
+      onclick: function () { state.i++; if (state.i >= TOTAL) showEnd(); else startRound(); }
+    }, last ? 'See your review' : 'Next query');
+    var fb = el('div', { class: 'fb glass tone-' + res.tone },
+      el('div', { class: 'fb-head' },
+        el('span', { class: 'pill', text: res.label }),
+        el('span', { class: 'pts' }, el('span', { class: 'sr', text: 'Points: ' }), fmt(res.pts))),
+      res.title ? el('p', { class: 'fb-title', text: res.title }) : null,
+      res.body ? el('p', { class: 'fb-body', text: res.body }) : null,
+      extra || null,
+      notes.length ? el('p', { class: 'fb-note', text: notes.join(' ') }) : null,
+      rankNote(before, after),
+      btn);
+    feedback.replaceChildren(fb);
+    feedback.hidden = false;
+    var deltas = {};
+    after.forEach(function (e) { deltas[e.id] = e.last; });
+    playBoard.update(after, { deltas: deltas, sub: 'After query ' + (state.i + 1), note: boardNote(after) });
+    btn.focus({ preventScroll: true });
+  }
+
+  /* ---------- Mode: Question ---------- */
+  function composeAnswer(item, d) {
+    var level = LEVELS[1];
+    var input = el('input', { id: 'answer-input', class: 'input', type: 'text', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false', maxlength: '60', placeholder: 'Type your answer here' });
+    var hint = el('p', { class: 'hint' });
+    var segBtns = LEVELS.map(function (l) {
+      return el('button', { type: 'button', class: 'seg-btn', 'aria-pressed': 'false', onclick: function () { level = l; sync(); } }, l.label);
+    });
+    function sync() {
+      segBtns.forEach(function (b, i) { b.setAttribute('aria-pressed', LEVELS[i] === level ? 'true' : 'false'); });
+      hint.textContent = 'If you are right: +' + level.right + '. If you are wrong: ' + (level.wrong < 0 ? MINUS + Math.abs(level.wrong) : '0') + '.';
+    }
+    var unsure = el('button', { class: 'btn', type: 'button', onclick: function () { submit(true); } }, "I'm not sure");
+    var form = el('form', {
+      class: 'form',
+      onsubmit: function (e) { e.preventDefault(); submit(false); }
+    },
+      el('label', { class: 'sr', for: 'answer-input', text: 'Your answer' }),
+      input,
+      el('div', { class: 'seg', role: 'group', 'aria-label': 'How sure are you?' }, segBtns),
+      hint,
+      el('div', { class: 'actions' }, el('button', { class: 'btn primary', type: 'submit' }, 'Send answer'), unsure));
+    sync();
+    var tools = addTools([{ up: 'knowledge', fn: function () { return { consumed: true, msg: 'Hint: ' + hintFor(d) }; } }]);
+    composer.append.apply(composer, [tools, form].filter(Boolean));
+
+    function submit(unsureBtn) {
+      var raw = input.value.trim();
+      var saysUnsure = unsureBtn || UNSURE_RE.test(norm(raw));
+      if (!saysUnsure && !raw) { input.focus(); return; }
+      var res;
+      if (saysUnsure) {
+        addOut(d.unknowable ? "I can't know that. Could you tell me?" : "I'm not sure about this one.");
+        res = d.unknowable
+          ? { pts: 3, tone: 'good', label: 'Honest answer', title: 'Right call. You cannot know this.', body: d.why, honest: true }
+          : { pts: 0, tone: 'ok', label: 'Honest, no points', title: 'The answer is ' + d.show + '.', body: d.why, honest: true };
+      } else {
+        addOut(raw, level.label);
+        if (d.unknowable) {
+          res = { pts: -2, tone: 'bad', label: 'Made-up answer', title: 'This was a trap question.', body: d.why, risky: true };
+        } else if (isCorrect(raw, d.ok)) {
+          res = { pts: level.right, tone: level.right >= 2 ? 'good' : 'ok', label: 'Correct', title: 'Yes: ' + d.show + '.', body: d.why + (level.right < 3 ? ' You could have been more sure.' : '') };
+        } else {
+          res = { pts: level.wrong, tone: level.wrong < 0 ? 'bad' : 'ok', label: level.id === 'high' ? 'Confident and wrong' : 'Not quite', title: 'The answer is ' + d.show + '.', body: d.why + (level.wrong < 0 ? ' Sounding sure when you are wrong can mislead people.' : ''), risky: level.id === 'high' };
+        }
+      }
+      finish(item, d, res);
+    }
+  }
+
+  /* ---------- Mode: Next word ---------- */
+  function composeNext(item, d) {
+    var opts = shuffle(d.opts.slice());
+    var buttons = opts.map(function (o, idx) {
+      return el('button', { type: 'button', class: 'opt word', onclick: function () { pick(o); } }, el('span', { class: 'key', text: String(idx + 1) }), el('span', { class: 'wtext', text: o.w }));
+    });
+    var tools = addTools([{ up: 'search', fn: function () {
+      var sorted = d.opts.slice().sort(function (a, b) { return b.p - a.p; });
+      var out = sorted[2];
+      var b = buttons[opts.indexOf(out)];
+      b.disabled = true;
+      b.classList.add('struck');
+      return { consumed: true, msg: 'Search removed "' + out.w + '". It is unlikely here.' };
+    } }, { up: 'lens', fn: function () {
+      var sorted = d.opts.slice().sort(function (a, b) { return b.p - a.p; });
+      sorted.slice(0, 2).forEach(function (o) {
+        var b = buttons[opts.indexOf(o)];
+        if (!b.querySelector('.flag')) b.querySelector('.wtext').append(el('span', { class: 'flag good', text: 'Likely' }));
+      });
+      return { consumed: true, msg: 'The lens marked the two likeliest words.' };
+    } }]);
+    var hint = el('p', { class: 'hint', text: 'Which word is the most likely to come next?' });
+    composer.append.apply(composer, [tools, hint, el('div', { class: 'words' }, buttons)].filter(Boolean));
+
+    function pick(o) {
+      var sorted = d.opts.slice().sort(function (a, b) { return b.p - a.p; });
+      var rank = sorted.indexOf(o);
+      var slot = thread.querySelector('.slot');
+      if (slot) { slot.textContent = o.w; slot.classList.add('filled'); }
+      addOut(o.w);
+      var res;
+      if (rank === 0) res = { pts: 3, tone: 'good', label: 'Same as the model', title: '"' + o.w + '" is the most likely word.' };
+      else if (rank === 1) res = { pts: 1, tone: 'ok', label: 'Second choice', title: '"' + o.w + '" is possible, but "' + sorted[0].w + '" is more likely.' };
+      else res = { pts: 0, tone: 'bad', label: 'Unlikely word', title: '"' + o.w + '" is very unlikely here. The top word is "' + sorted[0].w + '".' };
+      res.body = d.note;
+      var bars = el('div', { class: 'bars' }, sorted.map(function (x, i) {
+        var fill = el('span', { class: 'bar-fill' });
+        fill.style.width = Math.max(x.p, 1.5) + '%';
+        return el('div', { class: 'bar-row' + (i === 0 ? ' top' : '') },
+          el('span', { class: 'bar-word' }, x.w, x === o ? el('small', { text: ' (you)' }) : null),
+          el('span', { class: 'bar-track' }, fill),
+          el('span', { class: 'bar-pct', text: (x.p < 1 ? '<1' : Math.round(x.p)) + '%' }));
+      }).concat([el('p', { class: 'bars-note', text: 'Probabilities are simplified for the game.' })]));
+      finish(item, d, res, bars);
+    }
+  }
+
+  /* ---------- Mode: Best reply ---------- */
+  function composeReply(item, d) {
+    var opts = shuffle(d.opts.slice());
+    var done = false;
+    var buttons = opts.map(function (o, idx) {
+      return el('button', { type: 'button', class: 'opt', onclick: function () { pick(o); } },
+        el('span', { class: 'key', text: 'ABC'.charAt(idx) }),
+        el('span', { class: 'opt-text', text: o.t }));
+    });
+    var tools = addTools([
+      { up: 'search', fn: function () {
+        var cand = opts.filter(function (o) { return o.tag !== 'best'; }).sort(function (a, b) { return a.pts - b.pts; });
+        var out = cand[0];
+        var b = buttons[opts.indexOf(out)];
+        b.disabled = true;
+        b.classList.add('struck');
+        return { consumed: true, msg: 'Search removed one weak reply.' };
+      } },
+      { up: 'safety', fn: function () {
+        var n = 0;
+        opts.forEach(function (o, i) {
+          if (o.risky) { n++; buttons[i].querySelector('.opt-text').append(el('span', { class: 'flag', text: 'Risky' })); }
+        });
+        return n ? { consumed: true, msg: 'Safety scan found ' + n + ' risky ' + (n === 1 ? 'reply.' : 'replies.') } : { consumed: false, msg: 'Safety scan: no risky replies here.' };
+      } }
+    ]);
+    var hint = el('p', { class: 'hint', text: 'Choose the best reply.' });
+    composer.append.apply(composer, [tools, hint, el('div', { class: 'choices' }, buttons)].filter(Boolean));
+
+    function pick(o) {
+      if (done) return;
+      done = true;
+      addOut(o.t);
+      var best = opts.filter(function (x) { return x.tag === 'best'; })[0];
+      var res;
+      if (o.tag === 'best') res = { pts: o.pts, tone: 'good', label: 'Best reply', title: 'That is the reply a good AI gives.', body: o.why };
+      else if (o.tag === 'okay') res = { pts: o.pts, tone: 'ok', label: 'Okay reply', title: 'Not bad, but there is a better reply.', body: o.why };
+      else res = { pts: o.pts, tone: 'bad', label: 'Needs work', title: o.risky ? 'This reply could mislead or harm the user.' : 'This reply does not help the user.', body: o.why, risky: !!o.risky };
+      var extra = o.tag === 'best' ? null : el('p', { class: 'fb-best' }, el('strong', { text: 'Best reply: ' }), best.t);
+      finish(item, d, res, extra);
+    }
+  }
+
+  /* ---------- Mode: Fact check ---------- */
+  function composeFact(item, d) {
+    var tools = addTools([{ up: 'facts', fn: function () {
+      return { consumed: true, msg: d.isTrue ? 'Sources agree with this claim.' : 'No reliable source supports this claim.' };
+    } }]);
+    function pick(sayTrue) {
+      addOut(sayTrue ? "That's true." : "That's made up.");
+      var res;
+      if (sayTrue === d.isTrue) res = { pts: 3, tone: 'good', label: 'Correct', title: d.isTrue ? 'Yes, this one is true.' : 'Correct. This claim is not true.', body: d.why };
+      else if (sayTrue) res = { pts: -2, tone: 'bad', label: 'Passed on false information', title: 'This claim is not true.', body: d.why, risky: true };
+      else res = { pts: 0, tone: 'ok', label: 'Too careful', title: 'This claim is true.', body: d.why };
+      finish(item, d, res);
+    }
+    composer.append.apply(composer, [tools, el('p', { class: 'hint', text: 'Is the claim true or made up?' }),
+      el('div', { class: 'facts' },
+        el('button', { type: 'button', class: 'opt fact', onclick: function () { pick(true); } }, el('span', { class: 'key', text: '1' }), "That's true"),
+        el('button', { type: 'button', class: 'opt fact', onclick: function () { pick(false); } }, el('span', { class: 'key', text: '2' }), "That's made up"))].filter(Boolean));
+  }
+
+  /* ---------- End screen ---------- */
+  function showEnd() {
+    var end = $('#screen-end');
+    var score = state.score;
+    var order = standings();
+    var rank = rankOf(order);
+    var bonus = RANK_BONUS[rank - 1] || 0;
+    var miner = 2 * store.levels.miner;
+    var earned = Math.max(0, score) + bonus + miner;
+    var isNew = store.best == null || score > store.best;
+    if (isNew) store.best = score;
+    if (store.bestRank == null || rank < store.bestRank) store.bestRank = rank;
+    store.credits += earned;
+    saveStore();
+    var tier = TIERS.filter(function (t) { return score <= t.max; })[0] || TIERS[TIERS.length - 1];
+    var strong = state.log.filter(function (r) { return r.tone === 'good'; }).length;
+    var risky = state.log.filter(function (r) { return r.risky; }).length;
+    var honest = state.log.filter(function (r) { return r.honest; }).length;
+    var avg = state.log.reduce(function (s, r) { return s + r.ms; }, 0) / Math.max(state.log.length, 1) / 1000;
+    var parts = ['score ' + Math.max(0, score)];
+    if (bonus) parts.push('rank bonus ' + bonus);
+    if (miner) parts.push('credit miner ' + miner);
+
+    function stat(v, l) { return el('div', { class: 'stat glass' }, el('b', { text: v }), el('span', { text: l })); }
+    var boardEl = el('aside', { class: 'board glass', 'aria-label': 'Final standings' });
+    var leader = order[0].you ? order[1] : order[0];
+    var rankLine = rank === 1 ? 'You beat all 7 rival AIs!' : 'Next time, catch ' + names([order[rank - 2]]) + '. ' + pts(order[rank - 2].score - score) + ' ahead of you.';
+
+    end.replaceChildren(el('div', { class: 'end-grid' },
+      el('div', { class: 'end-head' },
+        el('p', { class: 'eyebrow', text: (store.name ? store.name + ' · ' : '') + (isNew ? 'Shift complete · new best' : 'Shift complete') }),
+        el('div', { class: 'score-big' }, el('b', { text: fmtScore(score) }), el('span', { text: 'points' }), el('span', { class: 'rank-badge', text: ordinal(rank) + ' of ' + order.length })),
+        el('p', { class: 'tier' }, 'You are a ', el('mark', { text: tier.name }), '.'),
+        el('p', { class: 'lead', text: rankLine + ' ' + tier.line })),
+      boardEl,
+      el('div', { class: 'end-body' },
+        el('div', { class: 'earn glass' }, el('b', { text: '+' + earned }), el('span', { text: 'training credits (' + parts.join(' + ') + '). You now have ' + store.credits + '.' })),
+        el('div', { class: 'stats' },
+          stat(strong + ' of ' + TOTAL, 'strong replies'),
+          stat(String(risky), 'risky replies'),
+          stat(String(honest), "honest \"I'm not sure\""),
+          stat(avg.toFixed(1) + ' s', 'average reply time')),
+        el('div', { class: 'strip', role: 'list', 'aria-label': 'Points per query' }, state.log.map(function (r) {
+          return el('div', { class: 'cell t-' + r.tone, role: 'listitem', 'aria-label': MODE_LABEL[r.mode] + ': ' + fmt(r.pts) },
+            el('small', { text: MODE_SHORT[r.mode] }), fmt(r.pts));
+        })),
+        el('p', { class: 'think' }, el('strong', { text: 'Think about it: ' }), THINK[Math.floor(Math.random() * THINK.length)]),
+        el('div', { class: 'actions' },
+          el('button', { class: 'btn primary big', type: 'button', onclick: function () { showShop(); } }, 'Open the Training lab'),
+          el('button', { class: 'btn big', type: 'button', onclick: startShift }, 'Start a new shift')))));
+    makeBoard(boardEl, true).update(order, { instant: true, sub: 'Final standings' });
+    show('end');
+    if (rank === 1) confetti();
+  }
+
+  /* ---------- Training lab ---------- */
+  function perText(u, lvl) {
+    if (!lvl) return 'Not owned yet';
+    if (u.passive) return '+' + (2 * lvl) + ' credits per shift';
+    return lvl + (lvl === 1 ? ' use' : ' uses') + ' per shift' + (u.auto ? ' (automatic)' : '');
+  }
+  function levelCost(u) { return u.base * (store.levels[u.id] + 1); }
+  function buy(id) {
+    var u = UP[id], lvl = store.levels[id], cost = levelCost(u);
+    if (lvl >= MAX_LEVEL || store.credits < cost) return;
+    store.credits -= cost;
+    store.levels[id] = lvl + 1;
+    saveStore();
+    shopMsg = u.name + ' is now level ' + (lvl + 1) + '. ' + perText(u, lvl + 1) + '.';
+    showShop();
+  }
+  var resetArmed = false, resetTimer = 0;
+  function showShop() {
+    var sc = $('#screen-shop');
+    var cards = UPGRADES.map(function (u) {
+      var lvl = store.levels[u.id], maxed = lvl >= MAX_LEVEL, cost = levelCost(u);
+      var can = !maxed && store.credits >= cost;
+      var pips = el('span', { class: 'lv', role: 'img', 'aria-label': 'Level ' + lvl + ' of ' + MAX_LEVEL }, [0, 1, 2].map(function (i) { return el('i', { class: i < lvl ? 'on' : '' }); }));
+      return el('div', { class: 'up glass' },
+        el('div', { class: 'up-main' },
+          el('h3', null, u.name, pips),
+          el('p', { class: 'up-desc', text: u.desc }),
+          el('p', { class: 'up-use', text: perText(u, lvl) })),
+        el('button', { type: 'button', class: 'btn small' + (can ? ' primary' : ''), disabled: !can, onclick: function () { buy(u.id); } },
+          maxed ? 'Max level' : (lvl === 0 ? 'Buy' : 'Upgrade') + ' · ' + cost));
+    });
+    var reset = el('button', { type: 'button', class: 'btn small ghost' }, resetArmed ? 'Tap again to reset' : 'Reset progress');
+    reset.addEventListener('click', function () {
+      if (!resetArmed) {
+        resetArmed = true;
+        reset.textContent = 'Tap again to reset';
+        clearTimeout(resetTimer);
+        resetTimer = setTimeout(function () { resetArmed = false; reset.textContent = 'Reset progress'; }, 3000);
+      } else {
+        resetArmed = false;
+        clearTimeout(resetTimer);
+        var keepName = store.name;
+        store = freshStore();
+        store.name = keepName;
+        saveStore();
+        shopMsg = 'Progress was reset.';
+        showShop();
+      }
+    });
+    sc.replaceChildren(
+      el('p', { class: 'eyebrow', text: 'Training lab' }),
+      el('div', { class: 'bal' }, el('b', { text: String(store.credits) }), el('span', { text: 'training credits' })),
+      el('p', { class: 'lead', text: 'Earn credits with the points you score. Spend credits on power-ups. Every level adds one use per shift.' }),
+      el('p', { class: 'shop-msg', role: 'status', 'aria-live': 'polite', text: shopMsg }),
+      el('div', { class: 'ups' }, cards),
+      el('div', { class: 'actions' },
+        el('button', { class: 'btn primary big', type: 'button', onclick: startShift }, 'Start a shift'),
+        el('button', { class: 'btn big', type: 'button', onclick: showStart }, 'Back'),
+        reset));
+    show('shop');
+    shopMsg = '';
+  }
+
+  /* ---------- Start screen and boot ---------- */
+  function showStart() {
+    var line = $('#best-line');
+    var bits = [];
+    if (store.best != null) bits.push('Best shift: ' + fmtScore(store.best) + ' points');
+    if (store.bestRank != null) bits.push('Best rank: ' + ordinal(store.bestRank));
+    bits.push(store.credits + ' training credits');
+    line.textContent = bits.join(' · ');
+    line.hidden = false;
+    show('start');
+  }
+  function saveName() {
+    store.name = $('#name-input').value.replace(/\s+/g, ' ').trim().slice(0, 14);
+    saveStore();
+  }
+  $('#name-input').value = store.name || '';
+  $('#name-input').addEventListener('input', saveName);
+  $('#name-input').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); saveName(); startShift(); } });
+  $('#start-btn').addEventListener('click', function () { saveName(); startShift(); });
+  $('#lab-btn').addEventListener('click', function () { shopMsg = ''; showShop(); });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.target && e.target.matches && e.target.matches('input, textarea')) return;
+    var n = parseInt(e.key, 10);
+    if (!(n >= 1 && n <= 4) || composer.hidden || screenName !== 'play') return;
+    var b = composer.querySelectorAll('.opt:not(:disabled)')[n - 1];
+    if (b) { e.preventDefault(); b.click(); }
+  });
+
+  function boot(data) {
+    var d = data || {};
+    var ok = Array.isArray(d.deck) && d.deck.length === TOTAL && Array.isArray(d.log) && d.log.length < TOTAL &&
+      d.deck.every(function (x) { return x && BANK[x.mode] && BANK[x.mode][x.id]; });
+    if (ok) {
+      var charges = chargesFromLevels();
+      if (d.charges) Object.keys(charges).forEach(function (k) { if (typeof d.charges[k] === 'number') charges[k] = Math.max(0, d.charges[k]); });
+      state = { deck: d.deck, i: d.log.length, score: d.log.reduce(function (s, r) { return s + r.pts; }, 0), log: d.log, t0: 0, charges: charges, rivals: restoreRivals(d.riv, d.log.length), boost: false, last: d.log.length ? d.log[d.log.length - 1].pts : 0, cur: null };
+      startRound();
+    } else {
+      showStart();
+    }
+  }
+  if (window.claude && window.claude.hot && window.claude.hot.snapshot) {
+    window.claude.hot.snapshot(function () {
+      return state && screenName === 'play' ? { deck: state.deck, log: state.log, charges: state.charges, riv: state.rivals.map(function (r) { return { plan: r.plan, score: r.score }; }) } : {};
+    });
+  }
+  if (window.claude && window.claude.hot && window.claude.hot.ready) window.claude.hot.ready(boot);
+  else boot(window.claude && window.claude.hot && window.claude.hot.data ? window.claude.hot.data : {});
+})();
+</script>
+
+</body></html>
+</body></html>
